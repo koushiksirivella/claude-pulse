@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Claude Pulse — system diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:    #0A0908;
+    --panel: #14110F;
+    --orange:#D97757;
+    --copper:#C87533;
+    --cream: #F8F4EC;
+    --mute:  #8B7355;
+    --line:  rgba(217,119,87,0.35);
+    --line-soft: rgba(217,119,87,0.15);
+    --green: #4ade80;
+    --red:   #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 60px 40px 80px;
+  }
+
+  /* HEADER */
+  header { text-align: center; margin-bottom: 60px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.35em;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: clamp(48px, 7vw, 88px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--cream) 0%, var(--orange) 70%, var(--copper) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .tagline {
+    font-size: 18px;
+    color: var(--mute);
+    margin-top: 18px;
+    letter-spacing: 0.02em;
+  }
+  .tagline strong { color: var(--orange); }
+
+  /* MIND MAP CONTAINER */
+  .mindmap {
+    position: relative;
+    width: 100%;
+    height: 1080px;
+    margin: 0 auto 80px;
+  }
+  .mindmap svg.lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* CENTER NODE */
+  .center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #1b1714 0%, #0d0b09 70%);
+    border: 2px solid var(--orange);
+    box-shadow:
+      0 0 60px rgba(217,119,87,0.35),
+      inset 0 0 30px rgba(217,119,87,0.08);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 5;
+  }
+  .center .name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    letter-spacing: 0.12em;
+    color: var(--cream);
+    text-align: center;
+  }
+  .center .name span { color: var(--orange); display: block; }
+  .center .ver {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--mute);
+    margin-top: 10px;
+    letter-spacing: 0.2em;
+  }
+
+  /* BRANCH NODES */
+  .branch {
+    position: absolute;
+    width: 280px;
+    background: rgba(20, 17, 15, 0.85);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 22px;
+    z-index: 3;
+    backdrop-filter: blur(6px);
+  }
+  .branch::before {
+    content: attr(data-p);
+    position: absolute;
+    top: -16px; left: 16px;
+    background: var(--bg);
+    color: var(--orange);
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    padding: 2px 10px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  .branch h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--cream);
+    margin-bottom: 10px;
+    line-height: 1.15;
+  }
+  .branch .pain {
+    font-size: 13px;
+    color: var(--red);
+    margin-bottom: 8px;
+    line-height: 1.4;
+    opacity: 0.95;
+  }
+  .branch .fix {
+    font-size: 13px;
+    color: var(--green);
+    margin-bottom: 8px;
+    line-height: 1.4;
+    opacity: 0.95;
+  }
+  .branch .show {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--mute);
+    line-height: 1.5;
+    border-top: 1px dashed var(--line-soft);
+    padding-top: 8px;
+    margin-top: 8px;
+  }
+  .branch .show strong { color: var(--orange); }
+
+  /* POSITION BRANCHES — 6 evenly around center */
+  /* angles: top-left, top-right, right, bottom-right, bottom-left, left */
+  .b1 { top: 40px;   left: 60px; }      /* P1 — top-left */
+  .b2 { top: 40px;   right: 60px; }     /* P2 — top-right */
+  .b3 { top: 440px;  right: 0; }        /* P3 — right */
+  .b4 { bottom: 40px; right: 60px; }    /* P4 — bottom-right */
+  .b5 { bottom: 40px; left: 60px; }     /* P5 — bottom-left */
+  .b6 { top: 440px;  left: 0;           /* P6 — left (the daily one — highlighted) */
+        border-color: var(--orange);
+        box-shadow: 0 0 40px rgba(217,119,87,0.18); }
+  .b6::before { background: var(--orange); color: var(--bg); border-color: var(--orange); }
+  .b6 .core {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* SECTION DIVIDERS */
+  .section {
+    margin-top: 100px;
+    padding-top: 60px;
+    border-top: 1px solid var(--line-soft);
+  }
+  .section h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 4vw, 48px);
+    text-align: center;
+    margin-bottom: 12px;
+    color: var(--cream);
+    letter-spacing: -0.02em;
+  }
+  .section .lead {
+    text-align: center;
+    color: var(--mute);
+    font-size: 16px;
+    margin-bottom: 50px;
+  }
+
+  /* ARCHITECTURE FLOW */
+  .arch {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr 80px 1fr;
+    align-items: center;
+    gap: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .arch-node {
+    background: rgba(20, 17, 15, 0.7);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 28px 24px;
+    text-align: center;
+  }
+  .arch-node h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--orange);
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+  }
+  .arch-node p {
+    font-size: 13px;
+    color: var(--mute);
+    line-height: 1.5;
+  }
+  .arch-node code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--cream);
+    background: rgba(0,0,0,0.4);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .arrow {
+    text-align: center;
+    color: var(--orange);
+    font-size: 32px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* INSTALL FLOW */
+  .install {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .step {
+    background: rgba(20, 17, 15, 0.7);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 28px 24px;
+    position: relative;
+  }
+  .step .num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 56px;
+    color: var(--orange);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .step h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--cream);
+    margin-bottom: 12px;
+  }
+  .step code {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--orange);
+    background: rgba(0,0,0,0.5);
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-top: 12px;
+    word-break: break-all;
+  }
+  .step p {
+    font-size: 14px;
+    color: var(--mute);
+    line-height: 1.5;
+  }
+
+  /* CAVEMAN STAT */
+  .caveman {
+    background: rgba(20, 17, 15, 0.7);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 50px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .caveman .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-top: 36px;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat .num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: clamp(56px, 7vw, 84px);
+    color: var(--orange);
+    line-height: 1;
+  }
+  .stat .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    color: var(--mute);
+    text-transform: uppercase;
+    margin-top: 12px;
+  }
+
+  /* FOOTER */
+  footer {
+    margin-top: 100px;
+    text-align: center;
+    padding: 60px 20px 0;
+    border-top: 1px solid var(--line-soft);
+  }
+  footer .repo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+  footer .author {
+    font-size: 14px;
+    color: var(--mute);
+  }
+  footer .author span { color: var(--cream); }
+  footer .license {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--mute);
+    letter-spacing: 0.2em;
+    margin-top: 14px;
+  }
+
+  /* RESPONSIVE — mobile */
+  @media (max-width: 1100px) {
+    .mindmap { height: auto; }
+    .mindmap svg.lines { display: none; }
+    .center {
+      position: relative;
+      transform: none;
+      top: auto; left: auto;
+      margin: 0 auto 30px;
+    }
+    .branch {
+      position: relative !important;
+      top: auto !important; left: auto !important;
+      right: auto !important; bottom: auto !important;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto 20px;
+    }
+    .arch { grid-template-columns: 1fr; gap: 12px; }
+    .arrow { transform: rotate(90deg); padding: 8px 0; }
+    .install { grid-template-columns: 1fr; }
+    .caveman .stats { grid-template-columns: 1fr; gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="eyebrow">System Diagram · 2026</div>
+    <h1>Claude Pulse</h1>
+    <p class="tagline">Six hidden problems in <strong>Claude Code on VS Code</strong> — one free widget fixes all of them.</p>
+  </header>
+
+  <!-- MIND MAP -->
+  <section class="mindmap">
+
+    <!-- SVG curved branch lines connecting center to each node -->
+    <svg class="lines" viewBox="0 0 1320 1080" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="line-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"  stop-color="#D97757" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#D97757" stop-opacity="0.2"/>
+        </linearGradient>
+      </defs>
+      <!-- center is at (660, 540), radius 120 -->
+      <!-- to b1 top-left  (~200, 100) -->
+      <path d="M 600,495 Q 420,360 200,140" stroke="url(#line-grad)" stroke-width="2" fill="none"/>
+      <!-- to b2 top-right (~1120, 100) -->
+      <path d="M 720,495 Q 900,360 1120,140" stroke="url(#line-grad)" stroke-width="2" fill="none"/>
+      <!-- to b3 right (~1180, 500) -->
+      <path d="M 780,540 Q 980,540 1180,500" stroke="url(#line-grad)" stroke-width="2" fill="none"/>
+      <!-- to b4 bottom-right (~1120, 920) -->
+      <path d="M 720,585 Q 900,720 1120,920" stroke="url(#line-grad)" stroke-width="2" fill="none"/>
+      <!-- to b5 bottom-left (~200, 920) -->
+      <path d="M 600,585 Q 420,720 200,920" stroke="url(#line-grad)" stroke-width="2" fill="none"/>
+      <!-- to b6 left (~140, 500) -->
+      <path d="M 540,540 Q 320,540 140,500" stroke="#D97757" stroke-width="3" fill="none"/>
+    </svg>
+
+    <!-- CENTER NODE -->
+    <div class="center">
+      <div class="name">CLAUDE<span>PULSE</span></div>
+      <div class="ver">v0.1.2 · MIT</div>
+    </div>
+
+    <!-- 6 BRANCH NODES -->
+    <div class="branch b1" data-p="P1">
+      <h3>5-hour block drain mystery</h3>
+      <div class="pain">▼ Max users hit 100% in 90 min, zero warning</div>
+      <div class="fix">▲ Live bar + burn-rate + projected minutes left</div>
+      <div class="show">Widget shows: <strong>5h % bar</strong>, <strong>k/min</strong>, orange@70 red@90</div>
+    </div>
+
+    <div class="branch b2" data-p="P2">
+      <h3>200k context blindness</h3>
+      <div class="pain">▼ No native indicator, /context burns turns + stale</div>
+      <div class="fix">▲ Reads session JSONL, refreshes every 1.5s</div>
+      <div class="show">Widget shows: <strong>context %</strong>, <strong>session id</strong>, tokens/200k</div>
+    </div>
+
+    <div class="branch b3" data-p="P3">
+      <h3>Cost in/out invisible</h3>
+      <div class="pain">▼ Output costs 5× input, ccusage shows only total</div>
+      <div class="fix">▲ 4 cards: input · output · cache-create · cache-read</div>
+      <div class="show">Widget shows: <strong>per-model split</strong>, API-eq $</div>
+    </div>
+
+    <div class="branch b4" data-p="P4">
+      <h3>Session handoff loss</h3>
+      <div class="pain">▼ VS Code crash = context wiped, /resume broken</div>
+      <div class="fix">▲ One-click "Copy Handoff Prompt" (v0.4)</div>
+      <div class="show">Pulls <strong>cwd · branch · files · last goal</strong> from JSONL</div>
+    </div>
+
+    <div class="branch b5" data-p="P5">
+      <h3>VS Code extension crashes</h3>
+      <div class="pain">▼ Dual claude.exe, 2GB RAM leak, editor freeze</div>
+      <div class="fix">▲ Process scanner + kill-stuck button (v0.4)</div>
+      <div class="show">Badges: <strong>DUAL · HUNG · OOM</strong></div>
+    </div>
+
+    <div class="branch b6" data-p="P6">
+      <div class="core">★ The Daily One — Core Unlock</div>
+      <h3>Usage is hidden</h3>
+      <div class="pain">▼ /cost · /context · open claude.ai — 30× per day</div>
+      <div class="fix">▲ Persistent floating widget, glance don't query</div>
+      <div class="show">Always-on-top · auto-launches on Claude Code session</div>
+    </div>
+
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section class="section">
+    <h2>Architecture</h2>
+    <p class="lead">Three small parts. Zero API calls to Anthropic. Zero tokens consumed.</p>
+    <div class="arch">
+      <div class="arch-node">
+        <h4>SOURCE</h4>
+        <p><code>~/.claude/projects/*/*.jsonl</code> — already on your disk from every Claude Code session</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="arch-node">
+        <h4>LOCAL SERVER</h4>
+        <p><code>localhost:7456</code><br>Node.js, no npm deps<br>Background cache:<br>ccusage 15s · JSONL 1.5s</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="arch-node">
+        <h4>WIDGET</h4>
+        <p>Chrome --app, 340×500<br>Pinned always-on-top<br>HTML/CSS/JS, no build step</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALL FLOW -->
+  <section class="section">
+    <h2>Install in 30 seconds</h2>
+    <p class="lead">Three commands. Widget pops. Auto-launches every Claude Code session afterwards.</p>
+    <div class="install">
+      <div class="step">
+        <div class="num">1</div>
+        <h4>Clone</h4>
+        <p>Pull the repo to anywhere on your machine</p>
+        <code>git clone github.com/koushiksirivella/claude-pulse</code>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h4>Enter</h4>
+        <p>Step into the cloned directory</p>
+        <code>cd claude-pulse</code>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h4>Run</h4>
+        <p>Double-click or run from terminal — widget pops + auto-launch hook installs</p>
+        <code>install.bat</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAVEMAN BONUS -->
+  <section class="section">
+    <h2>Bonus: bundled Caveman skills</h2>
+    <p class="lead">Three prompting skills shipped in the repo. Drop into <code style="color:var(--orange);font-family:'JetBrains Mono'">~/.claude/skills/</code>. Same answer, fewer tokens.</p>
+    <div class="caveman">
+      <div class="stats">
+        <div class="stat">
+          <div class="num">~75%</div>
+          <div class="lbl">Tokens saved</div>
+        </div>
+        <div class="stat">
+          <div class="num">3×</div>
+          <div class="lbl">Block runway</div>
+        </div>
+        <div class="stat">
+          <div class="num">0×</div>
+          <div class="lbl">Accuracy lost</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="repo">github.com/koushiksirivella/claude-pulse</div>
+    <div class="author">Built by <span>Koushik</span> · <span>@koushiksirivella</span> · Dynasty Studio · 2026</div>
+    <div class="license">MIT · FREE FOREVER · OPEN SOURCE</div>
+  </footer>
+
+</div>
+
+</body>
+</html>
