@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Claude Pulse — Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Hyper Frames brand colors (claude-reels DESIGN.md) */
+    --bg:       #0A0908;   /* warm near-black, NEVER pure #000 */
+    --panel:    #14110F;
+    --claude:   #D97757;   /* primary accent */
+    --copper:   #C87533;   /* secondary accent */
+    --mute:     #8B7355;   /* eyebrow / kicker */
+    --soft:     #A89178;   /* tertiary */
+    --text:     #F5F0E8;   /* cream, NEVER pure white */
+    --flash:    #FFFFFF;   /* 3-frame impact flash only */
+    --grid:     #1a1612;
+    --eye-bg:   #F5F0E8;
+    --eye-pupil:#0A0908;
+    --mood-color: var(--claude);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(217,119,87,0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(200,117,51,0.04) 0%, transparent 50%),
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  }
+
+  /* film grain — always on (per claude-reels brand) */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.08;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>");
+    z-index: 999;
+    animation: grain 1.2s steps(6) infinite;
+  }
+  @keyframes grain {
+    0%   { transform: translate(0,0); }
+    20%  { transform: translate(-3%, 4%); }
+    40%  { transform: translate(2%, -3%); }
+    60%  { transform: translate(-4%, 2%); }
+    80%  { transform: translate(3%, 3%); }
+    100% { transform: translate(0,0); }
+  }
+  /* vignette — always on */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(10,9,8,0.75) 100%);
+    z-index: 998;
+  }
+
+  /* white-flash overlay (3-frame impact on update) */
+  .flash {
+    position: absolute;
+    inset: 0;
+    background: var(--flash);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+    border-radius: 16px;
+  }
+  .flash.go { animation: flash-impact 0.1s steps(3); }
+  @keyframes flash-impact {
+    0%   { opacity: 0; }
+    33%  { opacity: 0.85; }
+    66%  { opacity: 0.4; }
+    100% { opacity: 0; }
+  }
+
+  /* ─── widget ─── */
+  .widget {
+    width: 340px;
+    max-height: 620px;
+    background: linear-gradient(145deg, #15151f 0%, #0d0d14 100%);
+    border: 1px solid rgba(217,119,87,0.2);
+    border-radius: 16px;
+    padding: 22px 22px 14px;
+    position: relative;
+    box-shadow:
+      0 0 0 1px rgba(217,119,87,0.04) inset,
+      0 20px 60px rgba(0,0,0,0.6),
+      0 0 30px rgba(217,119,87,0.08);
+    overflow: hidden;
+    will-change: transform;
+    display: flex;
+    flex-direction: column;
+  }
+  .widget-body {
+    flex: 1;
+    overflow-y: auto;
+    margin: 0 -8px;
+    padding: 0 8px;
+  }
+  .widget-body::-webkit-scrollbar { width: 4px; }
+  .widget-body::-webkit-scrollbar-thumb { background: rgba(217,119,87,0.3); border-radius: 2px; }
+  .widget-body::-webkit-scrollbar-track { background: transparent; }
+  .widget::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% -10%, rgba(217,119,87,0.12) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .titlebar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    position: relative;
+    z-index: 1;
+    -webkit-app-region: drag;
+    cursor: move;
+  }
+  .titlebar button { -webkit-app-region: no-drag; cursor: pointer; }
+  .title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--mute);
+    text-transform: uppercase;
+  }
+  .mode-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--mute);
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+  }
+  .mode-btn:hover { background: rgba(217,119,87,0.18); color: var(--claude); border-color: var(--claude); }
+  .mode-btn.spinning { animation: spin 0.8s linear infinite; color: var(--claude); }
+  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+  .last-updated {
+    font-size: 8px;
+    color: var(--mute);
+    letter-spacing: 0.1em;
+    text-align: center;
+    padding: 2px 0 0;
+    opacity: 0.7;
+  }
+  .widget.compact .last-updated { display: block; }
+
+  /* ─── COMPACT PAGE (PRIMARY — minimal footprint) ─── */
+  .widget.compact {
+    width: 220px;
+    max-height: none;
+    height: auto;
+    padding: 10px 12px 8px;
+    overflow: visible;
+    border-radius: 12px;
+  }
+  .widget.compact .widget-body {
+    overflow: visible;
+    flex: none;
+  }
+  /* compact mode = minimal — no disclaimer, no timestamp */
+  .widget.compact .last-updated { display: none !important; }
+  .widget.compact .panel:not([data-panel="main"]),
+  .widget.compact .tabs { display: none !important; }
+  .widget.compact .widget-body { overflow: visible; }
+  .widget.compact .section { margin-bottom: 6px; }
+  .widget.compact .section-head { font-size: 8px; margin-bottom: 3px; letter-spacing: 0.18em; }
+  .widget.compact .stats { font-size: 8.5px; padding: 1px 0; }
+  .widget.compact .bar-track { height: 5px; }
+  .widget.compact .title { font-size: 9px; letter-spacing: 0.22em; }
+  .widget.compact .titlebar { margin-bottom: 6px; }
+  .widget.compact .mode-btn { width: 18px; height: 18px; font-size: 10px; }
+  .widget.compact .dot { width: 6px; height: 6px; }
+  .widget.compact .footer { padding-top: 6px; margin-top: 4px; font-size: 9px; border-top: 1px solid rgba(255,255,255,0.04); }
+  .widget.compact .compact-caveman { padding: 6px 0 2px; margin-top: 6px; }
+  .widget.compact .titlebar { margin-bottom: 8px; }
+  /* Smaller character + tighter stage in compact */
+  .widget.compact .stage {
+    height: 44px;
+    margin-bottom: 4px;
+  }
+  .widget.compact .character {
+    width: 34px; height: 34px;
+  }
+  .widget.compact .face { top: 14px; left: 8px; width: 18px; }
+  .widget.compact .eye { width: 8px; height: 8px; }
+  .widget.compact .pupil { width: 3px; height: 3px; }
+  .widget.compact .mouth { width: 12px; height: 5px; bottom: 6px; }
+  .widget.compact .ring { width: 34px; height: 34px; }
+  .widget.compact .token-fly { font-size: 9px; }
+  /* In compact: show 5h, hide CONTEXT + WEEKLY by default (weekly behind toggle) */
+  .widget.compact .panel[data-panel="main"] .section:nth-child(2) { display: none !important; }
+  .widget.compact .panel[data-panel="main"] .section:nth-child(3) { display: none !important; }
+  /* Weekly is shown only when user clicks the toggle */
+  .widget.compact.show-weekly .panel[data-panel="main"] .section:nth-child(3) { display: block !important; }
+
+  /* tiny "more" toggle button */
+  .more-btn {
+    display: none;
+    background: transparent;
+    border: 1px dashed rgba(255,255,255,0.1);
+    color: var(--mute);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin: 6px 0 2px;
+    transition: all 0.2s;
+  }
+  .more-btn:hover { color: var(--claude); border-color: rgba(217,119,87,0.4); }
+  .widget.compact .more-btn { display: block; }
+
+  /* HERO 5h % big numeral in compact */
+  .widget.compact .panel[data-panel="main"] .section:nth-child(1) .pct {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 0;
+    color: var(--mood-color);
+    text-shadow: 0 0 10px var(--mood-color);
+    line-height: 1;
+  }
+  .widget.compact .panel[data-panel="main"] .section:nth-child(1) .section-head {
+    align-items: baseline;
+  }
+
+  /* Toast notification for panic auto-caveman */
+  .toast {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: var(--claude);
+    color: var(--bg);
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border-radius: 5px;
+    box-shadow: 0 10px 30px rgba(217,119,87,0.6);
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+    white-space: nowrap;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  /* compact mini caveman switch */
+  .widget.compact .compact-caveman {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0 4px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--mute);
+  }
+  .widget:not(.compact) .compact-caveman { display: none; }
+
+  /* hide the demo slider + hint when in compact mode (user isn't testing, they're working) */
+  body.compact-mode .hint,
+  body.compact-mode .slider-panel { display: none !important; }
+
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--mood-color);
+    box-shadow: 0 0 10px var(--mood-color);
+    animation: pulse-dot 2s ease-in-out infinite;
+    transition: background 0.5s, box-shadow 0.5s;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  /* ─── character stage ─── */
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 130px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+  .stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .character { z-index: 2; }
+
+  .character {
+    position: relative;
+    width: 96px; height: 96px;
+    will-change: transform;
+    animation: walk 1.6s ease-in-out infinite;
+  }
+  @keyframes walk {
+    0%, 100% { transform: translateY(0)   rotate(-2deg); }
+    25%      { transform: translateY(-4px) rotate(0deg); }
+    50%      { transform: translateY(0)   rotate(2deg); }
+    75%      { transform: translateY(-4px) rotate(0deg); }
+  }
+
+  /* ─── body ─── */
+  .body {
+    position: absolute;
+    inset: 0;
+    will-change: filter;
+    transition: filter 0.4s ease;
+  }
+  .body svg {
+    width: 100%; height: 100%;
+  }
+  .body path { fill: var(--mood-color); transition: fill 0.5s ease; }
+
+  /* halo */
+  .halo {
+    position: absolute;
+    inset: -14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--mood-color) 0%, transparent 65%);
+    opacity: 0.18;
+    z-index: -1;
+    animation: halo 3s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+  @keyframes halo {
+    0%, 100% { transform: scale(0.85); opacity: 0.12; }
+    50%      { transform: scale(1.1);  opacity: 0.22; }
+  }
+
+  /* ─── pixel-art reaction badges (no cartoon eyes — logo stays clean) ─── */
+  /* Each "pixel" = 4px to match the 24-unit viewBox scaled to 96px */
+  .reaction {
+    position: absolute;
+    pointer-events: none;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    will-change: transform, opacity;
+  }
+
+  /* PIXEL SPARKLE — 4-arm crisp pixel star */
+  .pix-sparkle {
+    width: 12px; height: 12px;
+    background:
+      linear-gradient(var(--mood-color), var(--mood-color)) no-repeat,
+      linear-gradient(var(--mood-color), var(--mood-color)) no-repeat;
+    background-size: 4px 12px, 12px 4px;
+    background-position: 4px 0, 0 4px;
+    filter: drop-shadow(0 0 4px var(--mood-color));
+  }
+  .pix-sparkle.s1 { top: 6px;  left: -10px; }
+  .pix-sparkle.s2 { top: -8px; right: 6px; }
+  .pix-sparkle.s3 { bottom: 6px; right: -10px; }
+  .mood-happy .pix-sparkle { opacity: 1; animation: sparkle-twinkle 1.8s ease-in-out infinite; }
+  .pix-sparkle.s2 { animation-delay: 0.6s; }
+  .pix-sparkle.s3 { animation-delay: 1.2s; }
+  @keyframes sparkle-twinkle {
+    0%, 100% { transform: scale(0.4) rotate(0deg);    opacity: 0; }
+    30%      { transform: scale(1.1) rotate(45deg);   opacity: 1; }
+    60%      { transform: scale(0.7) rotate(90deg);   opacity: 0.5; }
+    80%      { transform: scale(0)   rotate(135deg);  opacity: 0; }
+  }
+
+  /* PIXEL SWEAT DROP — pixel-shaped blue square (worried + dead) */
+  .pix-sweat {
+    top: 18px;
+    right: -2px;
+    width: 8px; height: 12px;
+    background:
+      linear-gradient(#6ec0ff, #6ec0ff) no-repeat,
+      linear-gradient(#6ec0ff, #6ec0ff) no-repeat,
+      linear-gradient(#9bd3ff, #9bd3ff) no-repeat;
+    background-size: 8px 8px, 4px 4px, 4px 4px;
+    background-position: 0 4px, 2px 0, 2px 2px;
+    filter: drop-shadow(0 0 3px rgba(110,192,255,0.6));
+  }
+  .mood-worried .pix-sweat, .mood-dead .pix-sweat {
+    opacity: 1;
+    animation: sweat-drip 1.8s ease-in-out infinite;
+  }
+  @keyframes sweat-drip {
+    0%, 100% { transform: translateY(0)  scale(1);   }
+    50%      { transform: translateY(6px) scale(1.1); opacity: 0.6; }
+  }
+
+  /* PIXEL "!" EXCLAMATION — worried mood */
+  .pix-bang {
+    top: -14px;
+    left: 50%;
+    margin-left: -2px;
+    width: 4px; height: 16px;
+    background:
+      linear-gradient(#facc15, #facc15) no-repeat,
+      linear-gradient(#facc15, #facc15) no-repeat;
+    background-size: 4px 8px, 4px 4px;
+    background-position: 0 0, 0 12px;
+    filter: drop-shadow(0 0 4px #facc15);
+  }
+  .mood-worried .pix-bang {
+    opacity: 1;
+    animation: bang-bob 1.2s ease-in-out infinite;
+  }
+  @keyframes bang-bob {
+    0%, 100% { transform: translateY(0)   scale(1); }
+    50%      { transform: translateY(-3px) scale(1.1); }
+  }
+
+  /* PIXEL "Z" SLEEP — dead/exhausted mood */
+  .pix-z {
+    top: -16px;
+    right: -4px;
+    width: 16px; height: 16px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    color: var(--mood-color);
+    text-shadow: 0 0 8px var(--mood-color);
+    line-height: 1;
+  }
+  .mood-dead .pix-z { opacity: 1; animation: z-float 2s ease-in-out infinite; }
+  @keyframes z-float {
+    0%   { transform: translate(0, 0)    rotate(-5deg); opacity: 1; }
+    100% { transform: translate(8px, -14px) rotate(15deg); opacity: 0; }
+  }
+
+  /* ─── MOOD body styling ─── */
+  .mood-happy   { --mood-color: #4ade80; }
+  .mood-neutral { --mood-color: var(--claude); }
+  .mood-worried { --mood-color: #facc15; }
+  .mood-dead    { --mood-color: #ef4444; }
+  .mood-dead .body svg { filter: grayscale(0.5) saturate(0.5) brightness(0.85); }
+
+  /* mood-driven animation overrides */
+  .mood-happy   { animation: walk-happy 1.0s ease-in-out infinite; }
+  .mood-worried { animation: walk-worried 0.5s ease-in-out infinite; }
+  .mood-dead    { animation: droop 3s ease-in-out infinite; }
+
+  @keyframes walk-happy {
+    0%, 100% { transform: translateY(0)   rotate(-3deg) scale(1); }
+    25%      { transform: translateY(-7px) rotate(0deg)  scale(1.03); }
+    50%      { transform: translateY(0)   rotate(3deg)  scale(1); }
+    75%      { transform: translateY(-7px) rotate(0deg)  scale(1.03); }
+  }
+  @keyframes walk-worried {
+    0%, 100% { transform: translate(0,0)    rotate(0deg); }
+    25%      { transform: translate(-1px,-2px) rotate(-1deg); }
+    50%      { transform: translate(1px,-1px)  rotate(1deg); }
+    75%      { transform: translate(-1px,-2px) rotate(-1deg); }
+  }
+  @keyframes droop {
+    0%, 100% { transform: translateY(2px) rotate(-8deg) scale(0.95); }
+    50%      { transform: translateY(4px) rotate(-12deg) scale(0.93); }
+  }
+
+  /* ring on update */
+  .ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 96px; height: 96px;
+    border: 1.5px solid var(--mood-color);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+  .character.update .ring {
+    animation: ring-expand 0.9s ease-out;
+  }
+  @keyframes ring-expand {
+    0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0.6; border-width: 2px; }
+    100% { transform: translate(-50%, -50%) scale(2.0); opacity: 0; border-width: 1px; }
+  }
+
+  /* update bounce — back.out(1.6) equivalent */
+  .character.update {
+    animation: msg-update 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes msg-update {
+    0%   { transform: scale(1)    translateY(0);    }
+    35%  { transform: scale(1.18) translateY(-6px); }
+    70%  { transform: scale(1.04) translateY(0);    }
+    100% { transform: scale(1)    translateY(0);    }
+  }
+
+  /* token-fly */
+  .token-fly {
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translate(-50%, 0);
+    color: var(--mood-color);
+    font-size: 14px;
+    font-weight: 700;
+    text-shadow: 0 0 8px var(--mood-color);
+    opacity: 0;
+    white-space: nowrap;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+  .token-fly.go {
+    animation: token-up 1.2s ease-out forwards;
+  }
+  @keyframes token-up {
+    0%   { transform: translate(-50%, 10px) scale(0.6); opacity: 0; }
+    20%  { transform: translate(-50%, -20px) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -80px) scale(0.9); opacity: 0; }
+  }
+
+  /* particle burst */
+  .particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .particle {
+    position: absolute;
+    width: 3px; height: 3px; border-radius: 50%;
+    background: var(--mood-color);
+    box-shadow: 0 0 6px var(--mood-color);
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  /* ─── bars ─── */
+  .section { margin-bottom: 14px; position: relative; z-index: 1; }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: 6px;
+  }
+  .section-head .pct { color: var(--mood-color); font-weight: 600; transition: color 0.5s; }
+
+  .bar-track {
+    height: 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--mood-color);
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s;
+    position: relative;
+    will-change: width;
+  }
+  .bar-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    animation: shimmer 2s linear infinite;
+  }
+  @keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--mute);
+    margin-top: 6px;
+  }
+  .stats .val { color: var(--text); font-weight: 500; }
+
+  .footer {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--mute);
+    position: relative;
+    z-index: 1;
+  }
+  .burn { color: var(--mood-color); transition: color 0.5s; }
+
+  /* ─── tabs + panels ─── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .panel[data-panel="main"].active { display: block; }
+  .panel h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--mute);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  .tabs {
+    display: flex;
+    gap: 3px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    position: relative;
+    z-index: 1;
+  }
+  .tab {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--mute);
+    font-family: 'Inter', sans-serif;
+    font-size: 8.5px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 6px 4px;
+    border-radius: 5px;
+    cursor: pointer;
+    flex: 1;
+    transition: all 0.2s;
+  }
+  .tab:hover { color: var(--text); border-color: rgba(255,255,255,0.12); }
+  .tab.active {
+    background: rgba(217,119,87,0.18);
+    color: var(--claude);
+    border-color: var(--claude);
+  }
+
+  /* key-value rows */
+  .kv {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 0;
+    color: var(--text);
+  }
+  .kv span:first-child {
+    color: var(--mute);
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+  .kv.divider {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 8px;
+    padding-top: 10px;
+    font-weight: 600;
+  }
+  .hint-text {
+    font-size: 9px;
+    color: var(--mute);
+    line-height: 1.5;
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  /* toggle rows */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 11px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .toggle-row input[type="checkbox"] {
+    appearance: none;
+    width: 28px;
+    height: 16px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-row input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    background: var(--text);
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .toggle-row input[type="checkbox"]:checked {
+    background: var(--claude);
+  }
+  .toggle-row input[type="checkbox"]:checked::before {
+    transform: translateX(12px);
+  }
+
+  /* fields (select dropdowns) */
+  .field { margin: 10px 0; }
+  .field label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: 5px;
+  }
+  .field select {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 7px 9px;
+    border-radius: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%238B7355' d='M0 0l5 6 5-6z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+  }
+  .field select:focus { border-color: var(--claude); }
+  .field select option {
+    background: #14110F;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    padding: 6px;
+  }
+  .field select option:hover,
+  .field select option:checked {
+    background: var(--claude);
+    color: var(--bg);
+  }
+
+  /* primary button */
+  .btn-primary {
+    background: var(--claude);
+    color: var(--bg);
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 11px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin: 8px 0;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.1); }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* handoff preview */
+  .ho-preview {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    line-height: 1.55;
+    color: var(--soft);
+    white-space: pre-wrap;
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 8px;
+  }
+  .ho-preview::-webkit-scrollbar { width: 4px; }
+  .ho-preview::-webkit-scrollbar-thumb { background: rgba(217,119,87,0.4); border-radius: 2px; }
+
+  /* health warnings + proc rows */
+  .warn {
+    background: rgba(250,204,21,0.12);
+    border: 1px solid rgba(250,204,21,0.4);
+    color: #facc15;
+    padding: 7px 10px;
+    border-radius: 5px;
+    font-size: 9.5px;
+    margin: 4px 0;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+  .warn.high {
+    background: rgba(239,68,68,0.12);
+    border-color: rgba(239,68,68,0.5);
+    color: #ef4444;
+  }
+  .proc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 10px;
+  }
+  .proc-row > div:first-child { flex: 1; }
+  .proc-meta {
+    color: var(--soft);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    margin-top: 2px;
+  }
+  .btn-danger {
+    background: transparent;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 9px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    transition: all 0.2s;
+  }
+  .btn-danger:hover { background: rgba(239,68,68,0.12); }
+
+  /* hint + slider */
+  .hint {
+    position: fixed;
+    bottom: 96px;
+    color: var(--mute);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-align: center;
+    width: 100%;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .hint span { color: var(--claude); }
+
+  .slider-panel {
+    position: fixed;
+    bottom: 24px;
+    z-index: 100;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20,20,28,0.9);
+    border: 1px solid rgba(217,119,87,0.2);
+    border-radius: 10px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    backdrop-filter: blur(8px);
+  }
+  .slider-panel label {
+    color: var(--mute);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .slider-panel input[type=range] {
+    -webkit-appearance: none;
+    width: 240px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    outline: none;
+  }
+  .slider-panel input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--claude-glow);
+    box-shadow: 0 0 10px var(--claude-glow);
+    cursor: pointer;
+  }
+  .slider-panel .pctval {
+    color: var(--claude-glow);
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 44px;
+    text-align: right;
+  }
+  .mood-tag {
+    font-size: 9px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: rgba(217,119,87,0.15);
+    color: var(--claude-glow);
+    min-width: 80px;
+    text-align: center;
+  }
+  .msg-btn {
+    background: rgba(217,119,87,0.2);
+    border: 1px solid rgba(217,119,87,0.4);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .msg-btn:hover {
+    background: rgba(217,119,87,0.35);
+    transform: translateY(-1px);
+  }
+</style>
+</head>
+<body>
+
+<div class="widget" id="widget">
+  <div class="flash" id="flash"></div>
+  <div class="toast" id="toast">⚡ caveman auto-engaged</div>
+  <div class="particles" id="particles"></div>
+
+  <div class="titlebar">
+    <div class="title">CLAUDE PULSE</div>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <button class="mode-btn" id="refreshBtn" title="Refresh now">↻</button>
+      <button class="mode-btn" id="modeBtn" title="Toggle compact / expanded">▾</button>
+      <div class="dot"></div>
+    </div>
+  </div>
+
+  <div class="widget-body">
+
+  <div class="stage" id="stage">
+    <canvas id="bgCanvas"></canvas>
+    <div class="character mood-neutral" id="character">
+      <div class="halo"></div>
+      <div class="ring"></div>
+
+      <div class="body">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path clip-rule="evenodd" fill-rule="evenodd"
+            d="M20.998 10.949H24v3.102h-3v3.028h-1.487V20H18v-2.921h-1.487V20H15v-2.921H9V20H7.488v-2.921H6V20H4.487v-2.921H3V14.05H0V10.95h3V5h17.998v5.949zM6 10.949h1.488V8.102H6v2.847zm10.51 0H18V8.102h-1.49v2.847z"></path>
+        </svg>
+      </div>
+
+      <div class="reaction pix-sparkle s1"></div>
+      <div class="reaction pix-sparkle s2"></div>
+      <div class="reaction pix-sparkle s3"></div>
+      <div class="reaction pix-sweat"></div>
+      <div class="reaction pix-bang"></div>
+      <div class="reaction pix-z">Z</div>
+
+      <div class="token-fly" id="tokenFly">+14.2k</div>
+    </div>
+  </div>
+
+  <!-- ─── MAIN PANEL ─── -->
+  <div class="panel active" data-panel="main">
+    <div class="section">
+      <div class="section-head"><span>5-hour block</span><span class="pct" id="pct1">100%</span></div>
+      <div class="bar-track"><div class="bar-fill" id="bar1" style="width: 100%; background: linear-gradient(90deg, #ef4444, #f87171);"></div></div>
+      <div class="stats"><span>tokens</span><span class="val" id="tok1">21.6M</span></div>
+      <div class="stats"><span>cost (API-eq)</span><span class="val">$17.96</span></div>
+      <div class="stats"><span>remain</span><span class="val">2h 58m</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><span>context window</span><span class="pct" id="ctx-pct">35%</span></div>
+      <div class="bar-track"><div class="bar-fill" id="ctx-bar" style="width: 35%; background: linear-gradient(90deg, #4ade80, #22c55e);"></div></div>
+      <div class="stats"><span>session</span><span class="val" id="ctx-session">2b578a65</span></div>
+      <div class="stats"><span>tokens of 200k</span><span class="val" id="ctx-tokens">69.7k</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><span>weekly limit</span><span class="pct">31%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width: 31%; background: #4ade80;"></div></div>
+      <div class="stats"><span>resets in</span><span class="val">4d 12h</span></div>
+    </div>
+
+    <!-- compact-mode-only: show/hide weekly limit -->
+    <button class="more-btn" id="weeklyToggle">+ weekly limit</button>
+
+    <!-- compact-mode-only mini caveman switch -->
+    <div class="compact-caveman">
+      <span>CAVEMAN</span>
+      <label class="toggle-row" style="padding:0;">
+        <input type="checkbox" id="cv-mini">
+        <span style="font-family:'JetBrains Mono'; font-size:9px;" id="cv-mini-label">off</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ─── TOKENS PANEL (P3) ─── -->
+  <div class="panel" data-panel="tokens">
+    <h3>SESSION SPLIT</h3>
+    <div class="kv"><span>input tokens</span><span id="t-input">2,536</span></div>
+    <div class="kv"><span>output tokens</span><span id="t-output">174.7k</span></div>
+    <div class="kv"><span>cache create</span><span id="t-cc">520k</span></div>
+    <div class="kv"><span>cache read</span><span id="t-cr">20.9M</span></div>
+    <div class="kv divider"><span>total</span><span id="t-total">21.6M</span></div>
+    <div class="kv"><span>cost (API-eq)</span><span id="t-cost">$17.96</span></div>
+    <div class="kv"><span>models</span><span id="t-models">opus-4.7 · sonnet-4.6</span></div>
+    <div class="kv"><span>burn rate</span><span id="t-burn">260k tok/min</span></div>
+    <div class="hint-text">Pro plan = flat fee. Cost shown is API-equivalent only.</div>
+  </div>
+
+  <!-- ─── CAVEMAN SUITE PANEL (P6) ─── -->
+  <div class="panel" data-panel="caveman">
+    <h3>CAVEMAN SUITE</h3>
+    <label class="toggle-row">
+      <input type="checkbox" id="cv-enabled" checked>
+      <span>Enabled</span>
+    </label>
+
+    <div class="field">
+      <label>Mode</label>
+      <select id="cv-mode">
+        <option value="lite">lite (~40% saved)</option>
+        <option value="full" selected>full (~75% saved)</option>
+        <option value="ultra">ultra (~85% saved)</option>
+        <option value="wenyan-lite">wenyan-lite (~70% CN)</option>
+        <option value="wenyan-full">wenyan-full (~85% CN)</option>
+        <option value="wenyan-ultra">wenyan-ultra (~90% CN)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Auto-engage at</label>
+      <select id="cv-auto">
+        <option value="0">manual only</option>
+        <option value="60">60% of 5h block</option>
+        <option value="70">70% of 5h block</option>
+        <option value="80" selected>80% of 5h block</option>
+        <option value="90">90% of 5h block</option>
+      </select>
+    </div>
+
+    <label class="toggle-row"><input type="checkbox" id="cv-commit" checked><span>Apply to commits (caveman-commit)</span></label>
+    <label class="toggle-row"><input type="checkbox" id="cv-review" checked><span>Apply to code reviews (caveman-review)</span></label>
+
+    <div class="kv divider"><span>saved this session</span><span style="color:var(--claude)" id="cv-saved">~412k tok</span></div>
+    <div class="hint-text" id="cv-status">Caveman full enabled — takes effect next Claude Code session start.</div>
+  </div>
+
+  <!-- ─── HANDOFF PANEL (P4) ─── -->
+  <div class="panel" data-panel="handoff">
+    <h3>HANDOFF GENERATOR</h3>
+    <p class="hint-text">Paste-ready prompt to resume in a new chat or other Claude Code instance.</p>
+    <button class="btn-primary" id="ho-copy">COPY HANDOFF</button>
+    <pre class="ho-preview" id="ho-preview">## Handoff Prompt (generated by Claude Pulse)
+
+**Working dir:** c:\Users\skous\Koushik AI Automation\Billionaire plan
+**Git branch:** HEAD
+**Entrypoint:** claude-vscode
+**Session ID:** 2b578a65-58a3-4e83-9b1d-2e0688e78881
+**Tokens used:** ~69,710
+
+### Files touched
+- claude-pulse-mockup/index.html
+- docs/superpowers/specs/2026-05-19-claude-pulse-design.md
+- docs/superpowers/plans/2026-05-19-claude-pulse-v0.1.md
+
+### Skills invoked
+- /caveman
+- /brainstorming
+- /jarvis
+- /writing-plans
+
+### Last user goal
+> add the complete things that you created right now so I can clearly see
+
+### Resume instruction
+You are picking up an in-flight session. Read the working dir, files, and last goal above. Continue from where the previous assistant left off.</pre>
+  </div>
+
+  <!-- ─── HEALTH PANEL (P5) ─── -->
+  <div class="panel" data-panel="health">
+    <h3>PROCESS HEALTH</h3>
+    <div id="hl-warnings"></div>
+    <div id="hl-list">
+      <div class="proc-row">
+        <div>
+          <div>claude.exe</div>
+          <div class="proc-meta">PID 15440 · 128 MB · 0.0% CPU · 8h running</div>
+        </div>
+        <button class="btn-danger" data-kill="15440">KILL</button>
+      </div>
+      <div class="proc-row">
+        <div>
+          <div>node.exe (Claude Code host)</div>
+          <div class="proc-meta">PID 8324 · 412 MB · 1.2% CPU · 8h running</div>
+        </div>
+        <button class="btn-danger" data-kill="8324">KILL</button>
+      </div>
+    </div>
+    <div class="hint-text">Refreshes every 5 seconds. Confirms before killing.</div>
+  </div>
+
+  <div class="footer">
+    <span>last msg <span class="val" style="color:#f5f5f0" id="lastmsg">14.2k tok</span></span>
+    <span class="burn" id="burn">⚡ 260k/min</span>
+  </div>
+  </div><!-- /.widget-body -->
+
+  <!-- ─── TAB STRIP ─── -->
+  <div class="tabs">
+    <button class="tab active" data-tab="main">main</button>
+    <button class="tab" data-tab="tokens">tokens</button>
+    <button class="tab" data-tab="caveman">caveman</button>
+    <button class="tab" data-tab="handoff">handoff</button>
+    <button class="tab" data-tab="health">health</button>
+  </div>
+</div>
+
+<div class="hint">drag the slider to test moods · click <span>simulate</span> for message animation</div>
+
+<div class="slider-panel">
+  <label>usage</label>
+  <input type="range" id="usageSlider" min="0" max="100" value="72">
+  <span class="pctval" id="pctVal">72%</span>
+  <span class="mood-tag" id="moodTag">neutral</span>
+  <button class="msg-btn" id="simBtn">simulate msg</button>
+</div>
+
+<script>
+  /* ─────────── CONFIG ─────────── */
+  const CONFIG = {
+    ambientCount: 28,          // background floating particles
+    burstCount: 22,            // particles per message burst
+    burstSpeed: 2.4,
+    ambientSpeed: 0.35,
+    mouseRadius: 60,
+    mouseStrength: 0.4,
+    moodColors: {
+      happy:   ['#4ade80', '#86efac', '#22c55e'],
+      neutral: ['#d97757', '#ff8a5c', '#ffae8a'],
+      worried: ['#facc15', '#fde047', '#eab308'],
+      dead:    ['#ef4444', '#f87171', '#fca5a5'],
+    }
+  };
+
+  const character = document.getElementById('character');
+  const particles = document.getElementById('particles');
+  const tokenFly  = document.getElementById('tokenFly');
+  const lastmsg   = document.getElementById('lastmsg');
+  const burn      = document.getElementById('burn');
+  const bar1      = document.getElementById('bar1');
+  const pct1      = document.getElementById('pct1');
+  const tok1      = document.getElementById('tok1');
+  const slider    = document.getElementById('usageSlider');
+  const pctVal    = document.getElementById('pctVal');
+  const moodTag   = document.getElementById('moodTag');
+  const simBtn    = document.getElementById('simBtn');
+
+  /* ─── mood logic ─── */
+  function moodFor(pct) {
+    if (pct < 40)   return 'happy';
+    if (pct < 70)   return 'neutral';
+    if (pct < 95)   return 'worried';
+    return 'dead';
+  }
+  function setMood(pct) {
+    const mood = moodFor(pct);
+    character.className = 'character mood-' + mood;
+    moodTag.textContent = mood;
+  }
+
+  /* ─── canvas particle pool ─── */
+  const stage = document.getElementById('stage');
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let canvasW = 0, canvasH = 0;
+
+  function resizeCanvas() {
+    const rect = stage.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = rect.width  * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width  = rect.width  + 'px';
+    canvas.style.height = rect.height + 'px';
+    canvasW = rect.width; canvasH = rect.height;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  const POOL_MAX = 80;
+  const pool = new Array(POOL_MAX);
+  for (let i = 0; i < POOL_MAX; i++) {
+    pool[i] = { active:false, x:0, y:0, vx:0, vy:0, size:1, life:1, color:'#fff', ambient:false };
+  }
+
+  let mouseX = -1000, mouseY = -1000;
+  stage.addEventListener('mousemove', e => {
+    const r = stage.getBoundingClientRect();
+    mouseX = e.clientX - r.left;
+    mouseY = e.clientY - r.top;
+  });
+  stage.addEventListener('mouseleave', () => { mouseX = -1000; mouseY = -1000; });
+
+  function getMoodKey() {
+    if (character.classList.contains('mood-happy'))   return 'happy';
+    if (character.classList.contains('mood-worried')) return 'worried';
+    if (character.classList.contains('mood-dead'))    return 'dead';
+    return 'neutral';
+  }
+
+  function spawnParticle(x, y, vx, vy, size, color, life, ambient=false) {
+    for (let i = 0; i < POOL_MAX; i++) {
+      const p = pool[i];
+      if (!p.active) {
+        p.active = true;
+        p.x = x; p.y = y; p.vx = vx; p.vy = vy;
+        p.size = size; p.color = color; p.life = life;
+        p.maxLife = life; p.ambient = ambient;
+        return p;
+      }
+    }
+    return null;
+  }
+
+  function emitBurst(cx, cy) {
+    const colors = CONFIG.moodColors[getMoodKey()];
+    for (let i = 0; i < CONFIG.burstCount; i++) {
+      const angle = (Math.PI * 2 * i) / CONFIG.burstCount + (Math.random() - 0.5) * 0.5;
+      const vel = CONFIG.burstSpeed * (0.6 + Math.random() * 0.6);
+      const vx = Math.cos(angle) * vel;
+      const vy = Math.sin(angle) * vel;
+      const size = Math.random() * 2.5 + 1.2;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      spawnParticle(cx, cy, vx, vy, size, color, 0.9 + Math.random() * 0.5);
+    }
+  }
+
+  function spawnAmbient() {
+    const colors = CONFIG.moodColors[getMoodKey()];
+    const x = Math.random() * canvasW;
+    const y = Math.random() * canvasH;
+    const angle = Math.random() * Math.PI * 2;
+    const vel = CONFIG.ambientSpeed * (0.5 + Math.random());
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    spawnParticle(x, y, Math.cos(angle)*vel, Math.sin(angle)*vel,
+                  Math.random() * 1.6 + 0.6, color, 999, true);
+  }
+
+  for (let i = 0; i < CONFIG.ambientCount; i++) spawnAmbient();
+
+  /* ─── animation loop ─── */
+  let lastTime = 0;
+  function tick(t) {
+    const dt = Math.min((t - lastTime) / 16.667, 3) || 1;
+    lastTime = t;
+
+    ctx.clearRect(0, 0, canvasW, canvasH);
+
+    let active = 0;
+    for (let i = 0; i < POOL_MAX; i++) {
+      const p = pool[i];
+      if (!p.active) continue;
+      active++;
+
+      // mouse repulsion
+      if (mouseX > -500) {
+        const dx = p.x - mouseX;
+        const dy = p.y - mouseY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < CONFIG.mouseRadius && dist > 0.1) {
+          const force = (1 - dist / CONFIG.mouseRadius) * CONFIG.mouseStrength;
+          p.vx += (dx / dist) * force;
+          p.vy += (dy / dist) * force;
+        }
+      }
+
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+
+      if (p.ambient) {
+        // toroidal wrap + gentle damping
+        if (p.x < -5) p.x = canvasW + 5;
+        if (p.x > canvasW + 5) p.x = -5;
+        if (p.y < -5) p.y = canvasH + 5;
+        if (p.y > canvasH + 5) p.y = -5;
+        p.vx *= 0.99; p.vy *= 0.99;
+        // gentle drift back to ambient speed
+        if (Math.abs(p.vx) < 0.2) p.vx += (Math.random() - 0.5) * 0.06;
+        if (Math.abs(p.vy) < 0.2) p.vy += (Math.random() - 0.5) * 0.06;
+      } else {
+        p.life -= 0.018 * dt;
+        if (p.life <= 0) { p.active = false; continue; }
+      }
+
+      const alpha = p.ambient ? 0.55 : Math.max(0, p.life);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+
+      // glow
+      ctx.globalAlpha = alpha * 0.25;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  function shootParticles() {
+    const cx = canvasW / 2;
+    const cy = canvasH / 2;
+    emitBurst(cx, cy);
+  }
+
+  /* ─── live token counters in TOKENS panel ─── */
+  let liveTokens = {
+    input: 2536,
+    output: 174684,
+    cacheCreate: 520213,
+    cacheRead: 20949554,
+  };
+  function fmt(n) {
+    if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
+    if (n >= 1e3) return (n/1e3).toFixed(1) + 'k';
+    return n.toLocaleString();
+  }
+  function refreshTokenPanel() {
+    document.getElementById('t-input').textContent  = fmt(liveTokens.input);
+    document.getElementById('t-output').textContent = fmt(liveTokens.output);
+    document.getElementById('t-cc').textContent     = fmt(liveTokens.cacheCreate);
+    document.getElementById('t-cr').textContent     = fmt(liveTokens.cacheRead);
+    const total = liveTokens.input + liveTokens.output + liveTokens.cacheCreate + liveTokens.cacheRead;
+    document.getElementById('t-total').textContent  = fmt(total);
+    // rough cost approximation: $0.83 per 1M tokens average mixed Pro
+    document.getElementById('t-cost').textContent   = '$' + (total / 1e6 * 0.83).toFixed(2);
+  }
+
+  /* ─── message animation ─── */
+  const flashEl = document.getElementById('flash');
+  function triggerUpdate() {
+    // bump live token counts realistically (per real Claude msg patterns)
+    liveTokens.input      += Math.floor(Math.random() * 50 + 10);
+    liveTokens.output     += Math.floor(Math.random() * 2000 + 800);
+    liveTokens.cacheCreate += Math.floor(Math.random() * 8000 + 2000);
+    liveTokens.cacheRead  += Math.floor(Math.random() * 80000 + 40000);
+    refreshTokenPanel();
+
+    // 3-frame white flash (claude-reels brand impact)
+    flashEl.classList.remove('go');
+    void flashEl.offsetWidth;
+    flashEl.classList.add('go');
+
+    character.classList.remove('update');
+    void character.offsetWidth;
+    character.classList.add('update');
+    shootParticles();
+    const delta = Math.random() * 25 + 8;
+    const newTok = delta.toFixed(1);
+    lastmsg.textContent = newTok + 'k tok';
+    tokenFly.textContent = '+' + newTok + 'k';
+    tokenFly.classList.remove('go');
+    void tokenFly.offsetWidth;
+    tokenFly.classList.add('go');
+    // Keep burn rate showing REAL value (don't fake on simulate)
+    burn.textContent = '⚡ ' + (REAL.burnRate / 1000).toFixed(0) + 'k/min';
+    // climb usage by a bit
+    const next = Math.min(100, parseInt(slider.value) + Math.round(delta / 5.8));
+    slider.value = next;
+    applyUsage(next);
+  }
+
+  /* ─── usage apply ─── */
+  // REAL data baked from ccusage at 2026-05-19 18:02
+  // blockLimit auto-grows in live mode (Anthropic doesn't expose a hard cap)
+  const REAL = {
+    blockTokens: 21646987,
+    blockLimit: 50000000,      // start big; auto-grows if exceeded
+    burnRate: 260460,          // tok/min
+    remainMin: 178,
+    costUSD: 17.96,
+    projectedTotal: 0,         // burn × remain + current
+  };
+
+  function applyUsage(val) {
+    const projectedTokens = (val / 100) * REAL.blockLimit;
+    bar1.style.width = val + '%';
+    pct1.textContent = Math.round(val) + '%';
+    tok1.textContent = (projectedTokens / 1e6).toFixed(1) + 'M';
+    pctVal.textContent = val + '%';
+    if (val > 95)      bar1.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
+    else if (val > 70) bar1.style.background = 'linear-gradient(90deg, #facc15, #fde047)';
+    else if (val > 40) bar1.style.background = 'linear-gradient(90deg, #d97757, #ff8a5c)';
+    else               bar1.style.background = 'linear-gradient(90deg, #4ade80, #22c55e)';
+    setMood(val);
+  }
+
+  slider.addEventListener('input', e => applyUsage(parseInt(e.target.value)));
+  simBtn.addEventListener('click', triggerUpdate);
+  character.addEventListener('click', triggerUpdate);
+
+  // Start at the REAL current state (100% — your block is maxed)
+  const initialPct = Math.min(100, (REAL.blockTokens / REAL.blockLimit) * 100);
+  slider.value = Math.round(initialPct);
+  applyUsage(Math.round(initialPct));
+  // Show real burn rate persistently
+  burn.textContent = '⚡ ' + (REAL.burnRate / 1000).toFixed(0) + 'k/min';
+
+  /* ─── COMPACT / EXPANDED MODE TOGGLE ─── */
+  const modeBtn = document.getElementById('modeBtn');
+  const widget = document.getElementById('widget');
+  function safeResize(w, h) {
+    try {
+      // Reposition first to ensure the resized window stays visible on the primary screen
+      const sw = screen.availWidth || 1920;
+      const sh = screen.availHeight || 1080;
+      const margin = 40;
+      let curX = window.screenX || 0;
+      let curY = window.screenY || 0;
+      // If new size would push off the right/bottom, shift left/up
+      if (curX + w > sw - 10) curX = Math.max(margin, sw - w - 20);
+      if (curY + h > sh - 10) curY = Math.max(margin, sh - h - 20);
+      window.moveTo(curX, curY);
+      window.resizeTo(w, h);
+    } catch {}
+  }
+
+  function applyMode(mode) {
+    if (mode === 'compact') {
+      widget.classList.add('compact');
+      document.body.classList.add('compact-mode');
+      modeBtn.textContent = '▴';
+      modeBtn.title = 'Expand to full view';
+      const showingWeekly = widget.classList.contains('show-weekly');
+      safeResize(240, showingWeekly ? 360 : 290);
+    } else {
+      widget.classList.remove('compact');
+      document.body.classList.remove('compact-mode');
+      modeBtn.textContent = '▾';
+      modeBtn.title = 'Collapse to compact view';
+      safeResize(420, 780);
+    }
+    try { localStorage.setItem('pulseMode', mode); } catch {}
+  }
+
+  // Mini caveman toggle in compact mode mirrors the full one
+  const cvMini = document.getElementById('cv-mini');
+  const cvMiniLabel = document.getElementById('cv-mini-label');
+  const cvFull = document.getElementById('cv-enabled');
+  function syncCaveman(from) {
+    const enabled = from === 'mini' ? cvMini.checked : cvFull.checked;
+    cvMini.checked = enabled;
+    cvFull.checked = enabled;
+    cvMiniLabel.textContent = enabled
+      ? (document.getElementById('cv-mode').value + ' on')
+      : 'off';
+    cvMiniLabel.style.color = enabled ? 'var(--claude)' : 'var(--mute)';
+  }
+  cvMini.addEventListener('change', () => syncCaveman('mini'));
+  cvFull.addEventListener('change', () => syncCaveman('full'));
+  document.getElementById('cv-mode').addEventListener('change', () => syncCaveman('full'));
+  syncCaveman('full');
+  modeBtn.addEventListener('click', () => {
+    applyMode(widget.classList.contains('compact') ? 'expanded' : 'compact');
+  });
+
+  // Weekly limit toggle (compact mode only) — resizes window so the section is visible
+  const weeklyToggle = document.getElementById('weeklyToggle');
+  function applyWeekly(showing) {
+    if (showing) widget.classList.add('show-weekly');
+    else widget.classList.remove('show-weekly');
+    weeklyToggle.textContent = showing ? '− hide weekly' : '+ weekly limit';
+    if (widget.classList.contains('compact')) {
+      safeResize(240, showing ? 360 : 290);
+    }
+    try { localStorage.setItem('pulseWeekly', showing ? '1' : '0'); } catch {}
+  }
+  if (weeklyToggle) {
+    const stored = (() => { try { return localStorage.getItem('pulseWeekly') === '1'; } catch { return false; } })();
+    applyWeekly(stored);
+    weeklyToggle.addEventListener('click', () => applyWeekly(!widget.classList.contains('show-weekly')));
+  }
+  // Restore last mode
+  try { applyMode(localStorage.getItem('pulseMode') || 'expanded'); } catch { applyMode('expanded'); }
+
+  /* ─── TAB SWITCHING ─── */
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector(`.panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
+    });
+  });
+
+  /* ─── CAVEMAN STATUS UPDATE ON CHANGE ─── */
+  const cvEnabled = document.getElementById('cv-enabled');
+  const cvMode = document.getElementById('cv-mode');
+  const cvStatus = document.getElementById('cv-status');
+  function updateCavemanStatus() {
+    if (cvEnabled.checked) {
+      cvStatus.textContent = `Caveman ${cvMode.value} enabled — takes effect next Claude Code session start.`;
+      cvStatus.style.color = '#4ade80';
+    } else {
+      cvStatus.textContent = 'Caveman disabled. Click to enable token savings.';
+      cvStatus.style.color = 'var(--mute)';
+    }
+  }
+  cvEnabled.addEventListener('change', updateCavemanStatus);
+  cvMode.addEventListener('change', updateCavemanStatus);
+
+  /* ─── HANDOFF COPY BUTTON ─── */
+  const hoBtn = document.getElementById('ho-copy');
+  const hoPreview = document.getElementById('ho-preview');
+  hoBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(hoPreview.textContent);
+      const old = hoBtn.textContent;
+      hoBtn.textContent = 'COPIED ✓';
+      hoBtn.style.background = '#4ade80';
+      setTimeout(() => { hoBtn.textContent = old; hoBtn.style.background = ''; }, 1500);
+    } catch (e) {
+      hoBtn.textContent = 'COPY FAILED';
+      setTimeout(() => { hoBtn.textContent = 'COPY HANDOFF'; }, 1500);
+    }
+  });
+
+  /* ─── HEALTH KILL BUTTONS (mock — just confirm) ─── */
+  document.querySelectorAll('[data-kill]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (confirm(`[MOCK] Would kill process PID ${btn.dataset.kill}. Continue?`)) {
+        btn.textContent = 'KILLED';
+        btn.style.opacity = '0.4';
+        btn.disabled = true;
+      }
+    });
+  });
+
+  /* ─── MOCK HEALTH WARNING (shows if 5h > 95%) ─── */
+  const hlWarnings = document.getElementById('hl-warnings');
+  function refreshHealthWarnings(pct) {
+    const warns = [];
+    if (pct >= 95) warns.push('<div class="warn high">⚠ MEMORY HIGH — risk of OOM crash</div>');
+    if (pct >= 85) warns.push('<div class="warn">⚠ APPROACHING LIMIT — consider caveman mode</div>');
+    hlWarnings.innerHTML = warns.join('') || '<div class="hint-text" style="margin-bottom:8px; font-style: normal;">No issues detected ✓</div>';
+  }
+  refreshHealthWarnings(72);
+
+  /* ─── extend applyUsage to also update context bar + warnings (single source) ─── */
+  const _baseApply = applyUsage;
+  applyUsage = function(val) {
+    _baseApply(val);
+    refreshHealthWarnings(val);
+    const ctxPct = Math.min(100, val * 0.55);
+    const ctxBar = document.getElementById('ctx-bar');
+    const ctxPctEl = document.getElementById('ctx-pct');
+    const ctxTokens = document.getElementById('ctx-tokens');
+    if (ctxBar) {
+      ctxBar.style.width = ctxPct + '%';
+      ctxPctEl.textContent = Math.round(ctxPct) + '%';
+      ctxTokens.textContent = (ctxPct * 2).toFixed(1) + 'k';
+      if (ctxPct > 80)      ctxBar.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
+      else if (ctxPct > 50) ctxBar.style.background = 'linear-gradient(90deg, #facc15, #fde047)';
+      else                  ctxBar.style.background = 'linear-gradient(90deg, #4ade80, #22c55e)';
+    }
+  };
+  // Re-apply at startup to sync context + warnings with initial state
+  applyUsage(parseInt(slider.value));
+
+  /* ─── PANIC AUTO-CAVEMAN + TOAST (engages at 90%) ─── */
+  let panicFired = false;
+  const PANIC_THRESHOLD = 90;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+  function checkPanic(pct) {
+    if (pct >= PANIC_THRESHOLD && !panicFired && !cvFull.checked) {
+      panicFired = true;
+      cvFull.checked = true;
+      syncCaveman('full');
+      showToast('⚡ caveman auto-engaged at ' + Math.round(pct) + '%');
+    }
+    if (pct < PANIC_THRESHOLD - 5) panicFired = false; // reset hysteresis
+  }
+  const _applyWithPanic = applyUsage;
+  applyUsage = function(val) { _applyWithPanic(val); checkPanic(val); };
+  // Re-evaluate now
+  applyUsage(parseInt(slider.value));
+
+  /* ═══════════ LIVE MODE (only when served over http://) ═══════════ */
+  if (location.protocol.startsWith('http')) {
+    let liveSliderLock = false;
+    // Mark "LIVE" in title — will upgrade to "REAL" when extension data arrives
+    document.querySelector('.title').innerHTML = 'CLAUDE PULSE<span id="liveTag" style="display:none"></span>';
+
+    function updateLiveTag(usingAnthropic) {
+      // Visual indicator moved to the status dot (top right) instead of inline title text
+      const dot = document.querySelector('.dot');
+      if (dot) {
+        if (usingAnthropic) {
+          dot.style.background = '#4ade80';
+          dot.style.boxShadow = '0 0 12px #4ade80';
+          dot.title = 'REAL · showing claude.ai\'s official %';
+        } else {
+          dot.style.background = 'var(--claude)';
+          dot.style.boxShadow = '0 0 10px var(--claude)';
+          dot.title = 'ccusage estimate';
+        }
+      }
+      // Hide any leftover LIVE/REAL tag in title
+      const tag = document.getElementById('liveTag');
+      if (tag) tag.style.display = 'none';
+    }
+
+    const refreshBtn = document.getElementById('refreshBtn');
+    let lastUpdatedEl = null;
+    function ensureLastUpdated() {
+      if (lastUpdatedEl) return lastUpdatedEl;
+      const footer = document.querySelector('.footer');
+      lastUpdatedEl = document.createElement('div');
+      lastUpdatedEl.className = 'last-updated';
+      footer.parentNode.insertBefore(lastUpdatedEl, footer.nextSibling);
+      return lastUpdatedEl;
+    }
+    async function fetchLive() {
+      refreshBtn.classList.add('spinning');
+      try {
+        const r = await fetch('/api/usage?t=' + Date.now(), { cache: 'no-store' });
+        const data = await r.json();
+
+        // ── REAL Anthropic % from extension takes priority over ccusage estimate ──
+        const usingAnthropic = data.anthropic && data.anthropicAgeMs != null && data.anthropicAgeMs < 600_000; // 10 min freshness
+        updateLiveTag(usingAnthropic);
+
+        // 5h block
+        if (data.block) {
+          const b = data.block;
+          REAL.blockTokens = b.totalTokens;
+          REAL.burnRate = b.burnRate?.tokensPerMinute || 0;
+          REAL.remainMin = b.projection?.remainingMinutes || 0;
+          REAL.costUSD = b.costUSD || 0;
+
+          const ccusagePct = Math.min(100, (b.totalTokens / REAL.blockLimit) * 100);
+          const pct = usingAnthropic && data.anthropic.current_session != null
+            ? data.anthropic.current_session
+            : ccusagePct;
+
+          if (!liveSliderLock) {
+            slider.value = Math.round(pct);
+            applyUsage(Math.round(pct));
+          }
+          // Update detailed rows on main panel
+          const rows = document.querySelectorAll('.panel[data-panel="main"] .stats');
+          if (rows[0]) rows[0].querySelector('.val').textContent = (b.totalTokens/1e6).toFixed(2) + 'M';
+          if (rows[1]) rows[1].querySelector('.val').textContent = '$' + b.costUSD.toFixed(2);
+          if (rows[2]) {
+            const min = b.projection?.remainingMinutes || 0;
+            rows[2].querySelector('.val').textContent = `${Math.floor(min/60)}h ${min%60}m`;
+          }
+          burn.textContent = '⚡ ' + (REAL.burnRate/1000).toFixed(0) + 'k/min';
+        }
+
+        // Context window
+        if (data.context) {
+          const ctx = data.context;
+          const ctxBar = document.getElementById('ctx-bar');
+          const ctxPctEl = document.getElementById('ctx-pct');
+          const ctxTokens = document.getElementById('ctx-tokens');
+          const ctxSession = document.getElementById('ctx-session');
+          const cpct = Math.min(100, ctx.pct_of_200k);
+          ctxBar.style.width = cpct + '%';
+          ctxPctEl.textContent = cpct.toFixed(1) + '%';
+          ctxTokens.textContent = (ctx.total_context/1000).toFixed(1) + 'k';
+          ctxSession.textContent = ctx.session_id.slice(0, 8);
+          if (cpct > 80)      ctxBar.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
+          else if (cpct > 50) ctxBar.style.background = 'linear-gradient(90deg, #facc15, #fde047)';
+          else                 ctxBar.style.background = 'linear-gradient(90deg, #4ade80, #22c55e)';
+        }
+
+        // Token split panel
+        if (data.latestSession) {
+          const s = data.latestSession;
+          document.getElementById('t-input').textContent  = fmt(s.inputTokens);
+          document.getElementById('t-output').textContent = fmt(s.outputTokens);
+          document.getElementById('t-cc').textContent     = fmt(s.cacheCreationTokens);
+          document.getElementById('t-cr').textContent     = fmt(s.cacheReadTokens);
+          document.getElementById('t-total').textContent  = fmt(s.totalTokens);
+          document.getElementById('t-cost').textContent   = '$' + s.totalCost.toFixed(2);
+          document.getElementById('t-models').textContent = (s.modelsUsed || []).map(m => m.replace('claude-','').replace(/-\d+$/,'')).join(' · ');
+          document.getElementById('t-burn').textContent   = (REAL.burnRate/1000).toFixed(0) + 'k tok/min';
+        }
+
+        // Health panel — replace mock procs with real
+        if (data.processes && data.processes.length) {
+          const list = document.getElementById('hl-list');
+          list.innerHTML = data.processes.map(p => `
+            <div class="proc-row">
+              <div>
+                <div>${p.name}</div>
+                <div class="proc-meta">PID ${p.pid} · ${Math.round(p.mem_mb)} MB</div>
+              </div>
+              <button class="btn-danger" data-kill="${p.pid}">KILL</button>
+            </div>
+          `).join('');
+        }
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2,'0');
+        const mm = String(now.getMinutes()).padStart(2,'0');
+        const ss = String(now.getSeconds()).padStart(2,'0');
+        ensureLastUpdated().textContent = `updated ${hh}:${mm}:${ss}`;
+      } catch (e) {
+        console.warn('live fetch failed', e);
+        ensureLastUpdated().textContent = 'fetch error — server down?';
+        ensureLastUpdated().style.color = '#ef4444';
+      }
+      refreshBtn.classList.remove('spinning');
+    }
+
+    refreshBtn.addEventListener('click', fetchLive);
+
+    // Pause auto-update when user drags slider
+    slider.addEventListener('mousedown', () => { liveSliderLock = true; });
+    slider.addEventListener('mouseup',   () => { setTimeout(() => liveSliderLock = false, 2000); });
+
+    fetchLive();
+    setInterval(fetchLive, 5000);   // faster: every 5s
+
+    // hide demo slider + hint in live mode (production use)
+    const slPanel = document.querySelector('.slider-panel');
+    const hintEl = document.querySelector('.hint');
+    if (slPanel) slPanel.style.display = 'none';
+    if (hintEl) hintEl.style.display = 'none';
+  } else {
+    // file:// mode — hide refresh button (no server to refresh from)
+    const rb = document.getElementById('refreshBtn');
+    if (rb) rb.style.display = 'none';
+  }
+</script>
+
+</body>
+</html>

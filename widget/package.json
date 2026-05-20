@@ -1,0 +1,18 @@
+{
+  "name": "claude-pulse",
+  "version": "0.1.0",
+  "description": "Local Claude Code usage widget — runs offline, reads JSONL + ccusage, pulls live % from claude.ai via Chrome extension",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "author": "Koushik (@koushiksirivella)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/koushiksirivella/claude-pulse"
+  }
+}
