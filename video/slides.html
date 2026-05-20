@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Claude Pulse — pitch slides</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0908;
+    --panel: #14110F;
+    --claude: #D97757;
+    --copper: #C87533;
+    --cream: #F8F4EC;
+    --mute: #8B7355;
+    --green: #4ade80;
+    --red: #ef4444;
+    --yellow: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    height: 100vh; overflow: hidden;
+    cursor: none;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(217,119,87,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(200,117,51,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/></svg>");
+    opacity: 0.04;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .deck { position: relative; height: 100vh; width: 100vw; z-index: 1; }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 60px 80px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+  .slide-num {
+    position: fixed; bottom: 24px; right: 32px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; color: var(--mute);
+    letter-spacing: 0.15em;
+    z-index: 10;
+  }
+  .progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--claude), var(--copper));
+    z-index: 10;
+    transition: width 0.4s ease;
+  }
+  .help {
+    position: fixed; bottom: 24px; left: 32px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--mute);
+    letter-spacing: 0.1em;
+    z-index: 10;
+  }
+  .kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    border: 1px solid rgba(217,119,87,0.3);
+    border-radius: 3px;
+    margin: 0 2px;
+    color: var(--cream);
+  }
+
+  h1.display {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: clamp(72px, 11vw, 180px);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    text-align: center;
+    background: linear-gradient(135deg, var(--cream) 0%, var(--claude) 60%, var(--copper) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  h1.huge {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: clamp(56px, 9vw, 140px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-align: center;
+  }
+  h1.med {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(40px, 6vw, 96px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-align: center;
+  }
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 4vw, 56px);
+    line-height: 1.05;
+    color: var(--cream);
+    margin-bottom: 36px;
+    letter-spacing: -0.015em;
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(11px, 1.1vw, 15px);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--claude);
+    margin-bottom: 24px;
+  }
+  p.lead {
+    font-size: clamp(20px, 2.2vw, 32px);
+    line-height: 1.4;
+    color: var(--cream);
+    max-width: 1100px;
+    text-align: center;
+    opacity: 0.92;
+  }
+  .accent { color: var(--claude); }
+  .strike { text-decoration: line-through; opacity: 0.5; }
+  .green  { color: var(--green); }
+  .red    { color: var(--red); }
+  .yellow { color: var(--yellow); }
+
+  /* Pain box (problem slides) */
+  .pain-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 56px;
+    max-width: 1300px; width: 100%; margin-top: 30px;
+  }
+  .pain-card, .fix-card {
+    border-radius: 14px;
+    padding: 36px 32px;
+    position: relative;
+  }
+  .pain-card {
+    background: rgba(239, 68, 68, 0.04);
+    border: 1px solid rgba(239, 68, 68, 0.22);
+  }
+  .fix-card {
+    background: rgba(74, 222, 128, 0.04);
+    border: 1px solid rgba(74, 222, 128, 0.28);
+  }
+  .pain-card h3, .fix-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .pain-card h3 { color: var(--red); }
+  .fix-card  h3 { color: var(--green); }
+  .pain-card p, .fix-card p {
+    font-size: 20px; line-height: 1.5; color: var(--cream);
+  }
+  .pain-card code, .fix-card code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    background: rgba(0,0,0,0.5);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--cream);
+  }
+
+  /* Big stats */
+  .stat-row {
+    display: flex; gap: 64px; margin-top: 40px;
+    justify-content: center; align-items: center; flex-wrap: wrap;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat .num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: clamp(54px, 7vw, 110px);
+    color: var(--claude);
+    line-height: 1;
+  }
+  .stat .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-top: 14px;
+  }
+
+  /* Code block install */
+  .install-block {
+    background: rgba(20, 17, 15, 0.7);
+    border: 1px solid rgba(217, 119, 87, 0.3);
+    border-radius: 14px;
+    padding: 36px 44px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(20px, 2.1vw, 30px);
+    line-height: 1.7;
+    color: var(--cream);
+    box-shadow: 0 0 80px rgba(217, 119, 87, 0.1);
+    max-width: 900px;
+  }
+  .install-block .prompt { color: var(--mute); user-select: none; }
+  .install-block .cmd { color: var(--cream); }
+  .install-block .comment { color: var(--mute); font-style: italic; }
+
+  /* Problem number badge */
+  .badge {
+    position: absolute;
+    top: 60px; left: 80px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: clamp(140px, 18vw, 280px);
+    color: rgba(217, 119, 87, 0.07);
+    line-height: 0.85;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* CTA card */
+  .cta-card {
+    border: 1px solid rgba(217, 119, 87, 0.4);
+    background: rgba(20, 17, 15, 0.5);
+    border-radius: 16px;
+    padding: 50px 60px;
+    margin-top: 36px;
+    text-align: center;
+    max-width: 800px;
+  }
+  .cta-card .repo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(20px, 2vw, 28px);
+    color: var(--claude);
+    margin: 24px 0;
+    word-break: break-all;
+  }
+
+  /* Use case grid */
+  .usecase-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
+    max-width: 1400px; width: 100%;
+  }
+  .usecase {
+    background: rgba(20, 17, 15, 0.5);
+    border: 1px solid rgba(217, 119, 87, 0.15);
+    border-radius: 12px;
+    padding: 30px 26px;
+  }
+  .usecase .icon {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 44px;
+    color: var(--claude);
+    margin-bottom: 16px;
+  }
+  .usecase h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    margin-bottom: 12px;
+    color: var(--cream);
+    letter-spacing: -0.01em;
+  }
+  .usecase p {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--mute);
+  }
+
+  /* Slide-specific spacing */
+  .narrow { max-width: 1100px; }
+  .gap-lg > * + * { margin-top: 36px; }
+  .gap-md > * + * { margin-top: 20px; }
+
+  /* Tag chip */
+  .chip {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border: 1px solid rgba(217, 119, 87, 0.4);
+    border-radius: 6px;
+    color: var(--claude);
+    margin: 0 6px;
+  }
+
+  /* Roadmap */
+  .roadmap {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px;
+    max-width: 1400px; width: 100%;
+  }
+  .road-card {
+    background: rgba(20, 17, 15, 0.5);
+    border: 1px solid rgba(217, 119, 87, 0.15);
+    border-radius: 10px;
+    padding: 24px 18px;
+    text-align: center;
+  }
+  .road-card.current { border-color: var(--green); background: rgba(74, 222, 128, 0.05); }
+  .road-card .v {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 38px;
+    color: var(--claude);
+  }
+  .road-card.current .v { color: var(--green); }
+  .road-card .what {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--mute);
+    margin-top: 8px;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1. HOOK -->
+  <section class="slide active gap-lg">
+    <div class="eyebrow">Claude Pulse · 2026</div>
+    <h1 class="display">6 problems<br>killing your<br>Claude Code.</h1>
+    <p class="lead">One free tool fixes all six. <span class="accent">In 30 seconds.</span></p>
+  </section>
+
+  <!-- 2. WHO + PROMISE -->
+  <section class="slide gap-lg">
+    <div class="eyebrow">Who built this</div>
+    <h1 class="med">Solo Indian founder.<br>19. College dropout.<br>Building publicly.</h1>
+    <p class="lead">First tool from Dynasty Studio. Open source. MIT.<br><span class="accent">Free forever.</span></p>
+  </section>
+
+  <!-- 3. THE DAILY PAIN (P6) -->
+  <section class="slide gap-md">
+    <div class="badge">06</div>
+    <div class="eyebrow">The one everyone hits daily</div>
+    <h1 class="huge">You can't<br>see your usage.</h1>
+    <p class="lead">You type <code style="font-family:'JetBrains Mono';color:var(--claude)">/cost</code>. You type <code style="font-family:'JetBrains Mono';color:var(--claude)">/context</code>. You open <code style="font-family:'JetBrains Mono';color:var(--claude)">claude.ai</code>.<br>You do this <span class="red">30 times a day.</span></p>
+  </section>
+
+  <!-- 4. THE FIX (widget intro) -->
+  <section class="slide gap-md">
+    <div class="eyebrow">Or you do this</div>
+    <h1 class="huge"><span class="accent">Glance.</span><br>Don't query.</h1>
+    <p class="lead">One small widget. Pinned on top.<br>Token count, $ cost, context %, burn rate — <span class="green">all live.</span></p>
+  </section>
+
+  <!-- 5. P1 — 5h block drain -->
+  <section class="slide">
+    <div class="badge">01</div>
+    <div class="eyebrow">Problem 01 · 5h block drain</div>
+    <h1 class="med" style="margin-bottom:40px"><span class="red">100%</span> in 90 minutes.<br>No warning.</h1>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <h3>What you do now</h3>
+        <p>Code calmly. Hit rate-limit error. Curse. Wait 3 hours. Repeat.</p>
+      </div>
+      <div class="fix-card">
+        <h3>What Pulse shows</h3>
+        <p>Live 5h bar. Burn rate per minute. <span class="yellow">Orange at 70%, red at 90%.</span> Projected minutes left.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. P2 — Context window blindness -->
+  <section class="slide">
+    <div class="badge">02</div>
+    <div class="eyebrow">Problem 02 · context blindness</div>
+    <h1 class="med" style="margin-bottom:40px">200k context. <span class="red">Zero indicator.</span></h1>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <h3>What you do now</h3>
+        <p>Type <code>/context</code> every few messages. Burns a turn. Stale instantly.</p>
+      </div>
+      <div class="fix-card">
+        <h3>What Pulse shows</h3>
+        <p>Live context bar. Reads your session JSONL directly. Updates <span class="green">every 1.5 seconds.</span> Zero turns burned.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. P3 — In/out cost split -->
+  <section class="slide">
+    <div class="badge">03</div>
+    <div class="eyebrow">Problem 03 · cost split invisible</div>
+    <h1 class="med" style="margin-bottom:40px">Output costs <span class="red">5×</span> input. You can't tell which is burning.</h1>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <h3>What ccusage shows</h3>
+        <p>Total cost only. No split between input, output, cache-create, cache-read.</p>
+      </div>
+      <div class="fix-card">
+        <h3>What Pulse shows</h3>
+        <p>4 token cards. <span class="green">Per-model split: Opus vs Sonnet.</span> Know exactly where the money goes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. P4 — Session handoff loss -->
+  <section class="slide">
+    <div class="badge">04</div>
+    <div class="eyebrow">Problem 04 · session handoff loss</div>
+    <h1 class="med" style="margin-bottom:40px">VS Code crashes. <span class="red">Context wiped.</span> 20 min to re-prime.</h1>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <h3>What you do now</h3>
+        <p>Manually retype "we were working on X, files are Y, goal is Z" every restart. <span class="chip">/resume broken</span></p>
+      </div>
+      <div class="fix-card">
+        <h3>What Pulse ships</h3>
+        <p>One-click <span class="green">Copy Handoff Prompt</span>. Auto-extracts cwd, branch, files touched, last goal. <span class="chip">v0.4</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. P5 — Crashes / dual process -->
+  <section class="slide">
+    <div class="badge">05</div>
+    <div class="eyebrow">Problem 05 · vs code crashes</div>
+    <h1 class="med" style="margin-bottom:40px"><span class="red">Two claude.exe processes.</span><br>2GB RAM. VS Code freezes.</h1>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <h3>What you do now</h3>
+        <p>Restart VS Code. Lose work. Re-prime. Lose 30 min.</p>
+      </div>
+      <div class="fix-card">
+        <h3>What Pulse ships</h3>
+        <p>Live process scanner. <span class="green">DUAL PROCESS / HUNG / OOM</span> badges. One-click kill stuck process. <span class="chip">v0.4</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. P6 recap (centerpiece) -->
+  <section class="slide">
+    <div class="badge">06</div>
+    <div class="eyebrow">Problem 06 · the core unlock</div>
+    <h1 class="med" style="margin-bottom:30px">Usage is hidden.<br>This is the daily one.</h1>
+    <p class="lead narrow">Five problems are the moat.<br><span class="accent">P6 is the unlock.</span><br>Persistent floating widget. No commands. No terminal. No tab-switching.</p>
+  </section>
+
+  <!-- 11. CAVEMAN REVEAL -->
+  <section class="slide gap-lg">
+    <div class="eyebrow">Bonus · bundled in the repo</div>
+    <h1 class="huge"><span class="accent">Caveman</span> skill suite</h1>
+    <p class="lead narrow">Same answer. Same correctness.<br>Same code blocks. <span class="green">75% fewer tokens.</span></p>
+    <div class="stat-row">
+      <div class="stat"><div class="num">~75%</div><div class="label">tokens saved</div></div>
+      <div class="stat"><div class="num">3×</div><div class="label">block runway</div></div>
+      <div class="stat"><div class="num">0×</div><div class="label">accuracy lost</div></div>
+    </div>
+  </section>
+
+  <!-- 12. SEE + ACT pair -->
+  <section class="slide gap-md">
+    <div class="eyebrow">The pairing</div>
+    <h1 class="med">Pulse = <span class="accent">SEE.</span><br>Caveman = <span class="accent">ACT.</span></h1>
+    <p class="lead narrow">See the burn rate. Toggle caveman. Burn slower.<br>Watch context. Toggle caveman. Stretch the window.</p>
+  </section>
+
+  <!-- 13. INSTALL — one paste -->
+  <section class="slide gap-md">
+    <div class="eyebrow">Install · one paste in Claude Code</div>
+    <h1 class="med">Zero terminal. Zero clicks.</h1>
+    <div class="install-block">
+      <span class="comment"># Paste this into Claude Code:</span><br><br>
+      <span class="cmd">Install Claude Pulse from</span><br>
+      <span class="cmd accent">github.com/koushiksirivella/claude-pulse</span><br>
+      <span class="cmd">— clone, run install.bat, verify health.</span>
+    </div>
+  </section>
+
+  <!-- 14. INSTALL — manual 30s -->
+  <section class="slide gap-md">
+    <div class="eyebrow">Or manual · 30 seconds</div>
+    <h1 class="med">Three steps. Done.</h1>
+    <div class="install-block">
+      <span class="prompt">$</span> <span class="cmd">git clone https://github.com/koushiksirivella/claude-pulse</span><br>
+      <span class="prompt">$</span> <span class="cmd">cd claude-pulse</span><br>
+      <span class="prompt">$</span> <span class="cmd accent">install.bat</span>
+    </div>
+    <p class="lead" style="margin-top:30px"><span class="green">Widget pops. Pinned on top. Auto-launches every Claude Code session.</span></p>
+  </section>
+
+  <!-- 15. USE CASES -->
+  <section class="slide">
+    <div class="eyebrow">Use cases · who this is for</div>
+    <h1 class="med" style="margin-bottom:44px">If you ship code daily.</h1>
+    <div class="usecase-grid">
+      <div class="usecase">
+        <div class="icon">A</div>
+        <h4>Max plan power-user</h4>
+        <p>You burn through 5h blocks. Pulse + Caveman = 3× longer runway. Stop hitting walls.</p>
+      </div>
+      <div class="usecase">
+        <div class="icon">B</div>
+        <h4>Multi-account dev</h4>
+        <p>Two Pro accounts (yours + team). Widget auto-detects which one Claude Code is logged into.</p>
+      </div>
+      <div class="usecase">
+        <div class="icon">C</div>
+        <h4>Long-session builder</h4>
+        <p>8-hour deep work sessions. Glance up. No /context spam. No flow break.</p>
+      </div>
+      <div class="usecase">
+        <div class="icon">D</div>
+        <h4>VS Code crash victim</h4>
+        <p>v0.4 process scanner. Kill the stuck claude.exe before it eats 2 GB.</p>
+      </div>
+      <div class="usecase">
+        <div class="icon">E</div>
+        <h4>Token-conscious team</h4>
+        <p>Real $ cost split per session. Find out which dev burns the most.</p>
+      </div>
+      <div class="usecase">
+        <div class="icon">F</div>
+        <h4>Skill-curious dev</h4>
+        <p>Drop the caveman skills into <code>~/.claude/skills/</code>. Get the savings without the widget.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16. ROADMAP -->
+  <section class="slide">
+    <div class="eyebrow">Roadmap · public, free forever</div>
+    <h1 class="med" style="margin-bottom:44px">5 versions in 90 days.</h1>
+    <div class="roadmap">
+      <div class="road-card current">
+        <div class="v">v0.1</div>
+        <div class="what"><strong>NOW</strong><br>Widget + skills + auto-launch</div>
+      </div>
+      <div class="road-card">
+        <div class="v">v0.2</div>
+        <div class="what">Tauri native .exe<br>Chrome Web Store</div>
+      </div>
+      <div class="road-card">
+        <div class="v">v0.3</div>
+        <div class="what">Caveman UI inside widget<br>One-click toggle</div>
+      </div>
+      <div class="road-card">
+        <div class="v">v0.4</div>
+        <div class="what">Handoff prompt<br>Process killer</div>
+      </div>
+      <div class="road-card">
+        <div class="v">v0.5</div>
+        <div class="what">Mac + Linux<br>builds</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17. CTA -->
+  <section class="slide gap-md">
+    <div class="eyebrow">Your move</div>
+    <h1 class="huge">Star · Clone · Issue.</h1>
+    <div class="cta-card">
+      <div class="repo">github.com/koushiksirivella/claude-pulse</div>
+      <p class="lead">Subscribe — I ship one tool every week.<br><span class="accent">Open an issue, I'll fix it next video.</span></p>
+    </div>
+  </section>
+
+</div>
+
+<div class="help"><span class="kbd">←</span> <span class="kbd">→</span> navigate · <span class="kbd">F</span> fullscreen · <span class="kbd">.</span> hide cursor</div>
+<div class="slide-num" id="slideNum">01 / 17</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total  = slides.length;
+  const num    = document.getElementById('slideNum');
+  const prog   = document.getElementById('progress');
+  let cur = 0;
+
+  function pad(n) { return String(n).padStart(2,'0'); }
+  function show(i) {
+    if (i < 0 || i >= total) return;
+    slides[cur].classList.remove('active');
+    cur = i;
+    slides[cur].classList.add('active');
+    num.textContent = `${pad(cur+1)} / ${pad(total)}`;
+    prog.style.width = `${((cur+1)/total)*100}%`;
+  }
+  show(0);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') show(cur+1);
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') show(cur-1);
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End')  show(total-1);
+    else if (e.key.toLowerCase() === 'f') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+    else if (e.key === '.') document.body.style.cursor = document.body.style.cursor === 'auto' ? 'none' : 'auto';
+  });
+  // click to advance
+  document.addEventListener('click', e => { if (!e.target.closest('a')) show(cur+1); });
+</script>
+</body>
+</html>
