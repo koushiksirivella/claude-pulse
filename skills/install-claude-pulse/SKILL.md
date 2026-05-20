@@ -75,6 +75,20 @@ Expected response: `{"ok":true,"uptime":<seconds>,"errors":[]}`
 
 If `errors` array is non-empty → relay the first error to the user and stop.
 
+### 6.5. Offer auto-launch on every Claude Code session
+
+After the health check passes, ask the user **once**:
+
+> "Want the widget to auto-open every time you start Claude Code? (Recommended — no more remembering to run launch.bat.)"
+
+If yes, run:
+```powershell
+powershell -ExecutionPolicy Bypass -File "<repo>/scripts/enable-autostart.ps1"
+```
+
+This registers a SessionStart hook in `~/.claude/settings.json`. To
+disable later, the user can run the same script with `-disable`.
+
 ### 7. Report success
 
 Tell the user (caveman-terse is fine):
