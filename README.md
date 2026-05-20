@@ -25,7 +25,23 @@ See [docs/PROBLEMS.md](docs/PROBLEMS.md) for sources + research.
 
 ---
 
-## 30-second install (Windows)
+## Install via Claude Code (one-paste, zero typing)
+
+Paste this into any Claude Code session and Claude installs the widget for you:
+
+```
+Install Claude Pulse from https://github.com/koushiksirivella/claude-pulse —
+clone to ~/Documents/claude-pulse, run install.bat, verify
+http://localhost:7456/api/health returns {"ok":true}, then tell me when the
+widget window is up. Free port 7456 first if it's taken.
+```
+
+Alternatively, copy the `skills/install-claude-pulse/` folder into your
+`~/.claude/skills/` directory and just say "install claude pulse" — same result.
+
+---
+
+## 30-second install (Windows, manual)
 
 ```bash
 git clone https://github.com/koushiksirivella/claude-pulse
