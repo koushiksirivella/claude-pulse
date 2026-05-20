@@ -1523,7 +1523,11 @@ You are picking up an in-flight session. Read the working dir, files, and last g
     weeklyToggle.addEventListener('click', () => applyWeekly(!widget.classList.contains('show-weekly')));
   }
   // Restore last mode
-  try { applyMode(localStorage.getItem('pulseMode') || 'compact'); } catch { applyMode('compact'); }
+  // v0.1.2: lock to compact mode. Toggle removed for cleanliness.
+  try { localStorage.removeItem('pulseMode'); } catch {}
+  applyMode('compact');
+  // Hide the mode toggle button — single-mode UI now
+  if (modeBtn) modeBtn.style.display = 'none';
 
   /* ─── TAB SWITCHING ─── */
   document.querySelectorAll('.tab').forEach(btn => {
