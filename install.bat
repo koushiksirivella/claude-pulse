@@ -35,7 +35,7 @@ timeout /t 3 /nobreak >nul
 
 echo.
 echo Launching widget window...
-start "" "chrome.exe" --app=http://localhost:7456 --window-size=510,900 --window-position=1000,40 2>nul
+start "" "chrome.exe" --app=http://localhost:7456 --window-size=340,500 --window-position=1170,80 2>nul
 
 if errorlevel 1 (
     echo [WARN] Chrome not on PATH. Opening default browser instead.
