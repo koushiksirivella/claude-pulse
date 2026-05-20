@@ -10,4 +10,7 @@ start "" /B cmd /c "node server.js > pulse.log 2>&1"
 timeout /t 2 /nobreak >nul
 start "" "chrome.exe" --app=http://localhost:7456 --window-size=510,900 --window-position=1000,40
 
+REM Pin widget always-on-top so VS Code clicks don't bury it
+powershell -ExecutionPolicy Bypass -File "%~dp0scripts\pin-on-top.ps1" >nul 2>&1
+
 endlocal

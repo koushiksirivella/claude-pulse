@@ -47,7 +47,11 @@ A small floating window appears showing 5-hour block, context window, weekly lim
 
 ---
 
-## Step 3 — Install the Chrome extension (optional but recommended)
+## Step 3 — Install the Chrome extension (OPTIONAL — skip if you don't care about exact %)
+
+**Do you need the extension?** No, widget works without it. You'll just see the ccusage *estimate* instead of Anthropic's exact %. Status dot stays ORANGE without extension, turns GREEN with it. Functionally identical.
+
+**If you want the green dot + exact match to claude.ai dashboard, follow below:**
 
 This makes the widget show **REAL** Anthropic usage % (the same number you see at claude.ai/settings/usage), not just the ccusage estimate.
 
@@ -63,7 +67,25 @@ You only need to visit the usage page once per Chrome session — the extension 
 
 ---
 
-## Step 4 — (Optional) Strip Chrome's mini caption bar
+## Step 4 — Always-on-top (auto from v0.1.1)
+
+`install.bat` and `launch.bat` now run `scripts/pin-on-top.ps1` automatically. Widget stays in front of VS Code, browser, Slack — every other window. Click VS Code, type code, glance up at widget, repeat.
+
+To unpin (let it go to background like a normal window):
+
+```powershell
+.\scripts\pin-on-top.ps1 -unpin
+```
+
+To re-pin manually:
+
+```powershell
+.\scripts\pin-on-top.ps1
+```
+
+---
+
+## Step 5 — (Optional) Strip Chrome's mini caption bar
 
 Chrome --app windows still show a tiny title bar at the very top. To remove it:
 

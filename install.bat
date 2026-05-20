@@ -42,6 +42,9 @@ if errorlevel 1 (
     start "" "http://localhost:7456"
 )
 
+REM Pin widget always-on-top so VS Code clicks don't bury it
+powershell -ExecutionPolicy Bypass -File "%~dp0scripts\pin-on-top.ps1" >nul 2>&1
+
 echo.
 echo ============================================
 echo   NEXT STEP - Chrome Extension (60 sec)
