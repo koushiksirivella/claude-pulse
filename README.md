@@ -25,7 +25,7 @@ See [docs/PROBLEMS.md](docs/PROBLEMS.md) for sources + research.
 
 ---
 
-## 60-second install (Windows)
+## 30-second install (Windows)
 
 ```bash
 git clone https://github.com/koushiksirivella/claude-pulse
@@ -33,14 +33,11 @@ cd claude-pulse
 install.bat
 ```
 
-That's it. The installer:
+That's it. Three steps. Widget pops up. No Chrome dance, no dev mode, no clicks.
 
-1. Verifies Node.js
-2. Starts a local server on `localhost:7456`
-3. Opens the widget as a Chrome app window
-4. Tells you how to load the optional Chrome extension (for REAL Anthropic %)
+Token count, $ cost, context window — all **exact**. (Bar % is 5-10% approximate; install the optional Chrome bridge in [docs/EXTENSION.md](docs/EXTENSION.md) if you want exact bars too.)
 
-For full step-by-step: **[docs/INSTALL.md](docs/INSTALL.md)**
+Full step-by-step: **[docs/INSTALL.md](docs/INSTALL.md)**
 
 ---
 

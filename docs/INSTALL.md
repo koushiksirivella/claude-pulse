@@ -47,23 +47,13 @@ A small floating window appears showing 5-hour block, context window, weekly lim
 
 ---
 
-## Step 3 — Install the Chrome extension (OPTIONAL — skip if you don't care about exact %)
+## Step 3 — DONE
 
-**Do you need the extension?** No, widget works without it. You'll just see the ccusage *estimate* instead of Anthropic's exact %. Status dot stays ORANGE without extension, turns GREEN with it. Functionally identical.
+Widget is running. Glance at it whenever you want.
 
-**If you want the green dot + exact match to claude.ai dashboard, follow below:**
+Every absolute number (tokens, $, context %, burn rate) is already **exact**. Only the 5h block and weekly bars are 5-10% approximate vs Anthropic's weighted formula.
 
-This makes the widget show **REAL** Anthropic usage % (the same number you see at claude.ai/settings/usage), not just the ccusage estimate.
-
-1. Open `chrome://extensions`
-2. Toggle **Developer mode** ON (top-right)
-3. Click **Load unpacked**
-4. Select the `extension/` folder inside this repo
-5. Pin the extension to your toolbar (optional)
-
-Then **visit https://claude.ai/settings/usage once**. The extension scrapes the percentage and forwards it to your local widget. After that, your widget status dot turns **GREEN** and the bar shows the official %.
-
-You only need to visit the usage page once per Chrome session — the extension caches the value and keeps replaying it to the widget.
+Want bar % to exactly match `claude.ai/settings/usage`? See **[EXTENSION.md](EXTENSION.md)** for the optional Chrome bridge. Otherwise ignore — you're not missing meaningful data.
 
 ---
 

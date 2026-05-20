@@ -47,20 +47,18 @@ powershell -ExecutionPolicy Bypass -File "%~dp0scripts\pin-on-top.ps1" >nul 2>&1
 
 echo.
 echo ============================================
-echo   NEXT STEP - Chrome Extension (60 sec)
+echo   DONE. Widget is now running.
 echo ============================================
 echo.
-echo To see your REAL Anthropic usage %% (not just ccusage estimate):
+echo   Token count, $ cost, context %% are EXACT.
+echo   5h block %% bar is 5-10%% off Anthropic's
+echo   weighted formula. (Cosmetic only.)
 echo.
-echo   1. Open chrome://extensions
-echo   2. Toggle "Developer mode" ON  ^(top-right^)
-echo   3. Click "Load unpacked"
-echo   4. Select the "extension" folder in this repo
-echo   5. Visit https://claude.ai/settings/usage ONCE
-echo   6. Widget dot turns GREEN = real data flowing
+echo   To exact-match claude.ai dashboard:
+echo   See docs/EXTENSION.md for the optional
+echo   Chrome bridge (v0.2 ships as Web Store).
 echo.
-echo Press any key to open chrome://extensions ...
+echo Press any key to close this window.
 pause >nul
-start "" "chrome://extensions"
 
 endlocal
