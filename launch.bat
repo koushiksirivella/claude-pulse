@@ -8,6 +8,6 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":7456" ^| findstr "LISTENING
 
 start "" /B cmd /c "node server.js > pulse.log 2>&1"
 timeout /t 2 /nobreak >nul
-start "" "chrome.exe" --app=http://localhost:7456 --window-size=384,680 --window-position=1100,80
+start "" "chrome.exe" --app=http://localhost:7456 --window-size=510,900 --window-position=1000,40
 
 endlocal
