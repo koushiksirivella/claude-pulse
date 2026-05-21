@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Claude Pulse — Mockup</title>
-<style id="zoom-bump">html, body { zoom: 1.15; overflow-x: hidden; }</style>
+<style id="zoom-bump">html, body { zoom: 1; overflow-x: hidden; }</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1546,14 +1546,14 @@ You are picking up an in-flight session. Read the working dir, files, and last g
       document.body.classList.add('minimized');
       miniBtn.textContent = '⊡';
       miniBtn.title = 'Restore';
-      safeResize(340, 110);
+      safeResize(400, 100);
     } else {
       widget.classList.remove('minimized');
       document.body.classList.remove('minimized');
       miniBtn.textContent = '⊟';
       miniBtn.title = 'Minimize to status bar';
       const showingWeekly = widget.classList.contains('show-weekly');
-      safeResize(340, showingWeekly ? 580 : 500);
+      safeResize(400, showingWeekly ? 720 : 640);
     }
     try { localStorage.setItem('pulseMinimized', on ? '1' : '0'); } catch {}
   }
@@ -1570,7 +1570,7 @@ You are picking up an in-flight session. Read the working dir, files, and last g
     else widget.classList.remove('show-weekly');
     weeklyToggle.textContent = showing ? '− hide weekly' : '+ weekly limit';
     if (widget.classList.contains('compact')) {
-      safeResize(240, showing ? 360 : 290);
+      safeResize(400, showing ? 720 : 640);
     }
     try { localStorage.setItem('pulseWeekly', showing ? '1' : '0'); } catch {}
   }

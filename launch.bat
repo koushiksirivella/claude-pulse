@@ -8,7 +8,7 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":7456" ^| findstr "LISTENING
 
 start "" /B cmd /c "node server.js > pulse.log 2>&1"
 timeout /t 2 /nobreak >nul
-start "" "chrome.exe" --app=http://localhost:7456 --window-size=340,500 --window-position=1170,80
+start "" "chrome.exe" --app=http://localhost:7456 --window-size=400,640 --window-position=1110,60
 
 REM Pin widget always-on-top so VS Code clicks don't bury it
 powershell -ExecutionPolicy Bypass -File "%~dp0scripts\pin-on-top.ps1" >nul 2>&1
