@@ -36,8 +36,18 @@ http://localhost:7456/api/health returns {"ok":true}, then tell me when the
 widget window is up. Free port 7456 first if it's taken.
 ```
 
-Alternatively, copy the `skills/install-claude-pulse/` folder into your
-`~/.claude/skills/` directory and just say "install claude pulse" — same result.
+### Even better: install the global `claude-pulse` skill
+
+Copy `skills/claude-pulse/` into your `~/.claude/skills/` directory once.
+After that, from **any** Claude Code workspace you can just say:
+
+- `install claude pulse` — clones repo, runs install.bat, verifies
+- `start pulse` / `open pulse` / `enable pulse` — launches the widget
+- `stop pulse` / `kill pulse` — closes widget + server
+- `update pulse` — git pull + restart
+- `pulse status` — quick health check
+
+Single skill. Works from any workspace. No more typing `cd` or `launch.bat`.
 
 ---
 
