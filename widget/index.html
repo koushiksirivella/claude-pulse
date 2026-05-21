@@ -239,16 +239,17 @@
   .more-btn:hover { color: var(--claude); border-color: rgba(217,119,87,0.4); }
   .widget.compact .more-btn { display: block; }
 
-  /* HERO 5h % big numeral in compact */
+  /* HERO 5h % big numeral in compact — reduced + label wraps clean */
   .widget.compact .panel[data-panel="main"] .section:nth-child(1) .pct {
     font-family: 'Syne', sans-serif;
     font-weight: 900;
-    font-size: 22px;
-    letter-spacing: 0;
+    font-size: 14px;
+    letter-spacing: 0.04em;
     color: var(--mood-color);
-    text-shadow: 0 0 10px var(--mood-color);
+    text-shadow: 0 0 8px var(--mood-color);
     line-height: 1;
   }
+  .widget.compact .section-head { white-space: nowrap; flex-wrap: nowrap; gap: 10px; }
   .widget.compact .panel[data-panel="main"] .section:nth-child(1) .section-head {
     align-items: baseline;
   }

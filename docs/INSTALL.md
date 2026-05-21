@@ -93,17 +93,15 @@ For a truly frameless build that doesn't need this hack, wait for v0.2 (Tauri).
 
 After the first install, you don't need to run `install.bat` again. Just double-click `launch.bat` whenever you want to bring the widget up.
 
-### Auto-launch on every Claude Code session (recommended)
+### Auto-launch on every Claude Code session (OPT-IN — not recommended for v0.1)
 
-Run this once from inside the repo:
+> The SessionStart hook approach in v0.1 is unreliable on Windows — it fires correctly the first time but Claude Code in VS Code spawns sessions in ways that sometimes skip it. Use the Startup-folder method below instead. The hook script is kept for power users.
+
+If you still want to try it (opt-in only):
 
 ```powershell
 .\scripts\enable-autostart.ps1
 ```
-
-This registers a `SessionStart` hook in `~/.claude/settings.json`. Every
-time you open Claude Code in VS Code (or terminal), the widget pops up
-automatically. No more remembering to run `launch.bat`.
 
 To disable later:
 
