@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Claude Pulse — Mockup</title>
-<style id="zoom-bump">html, body { zoom: 1.35; }</style>
+<style id="zoom-bump">html, body { zoom: 1.15; overflow-x: hidden; }</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -238,6 +238,34 @@
   }
   .more-btn:hover { color: var(--claude); border-color: rgba(217,119,87,0.4); }
   .widget.compact .more-btn { display: block; }
+
+  /* Minimized mode: hide everything except titlebar + tiny stat row */
+  .widget.minimized .widget-body,
+  .widget.minimized .stage,
+  .widget.minimized .panel,
+  .widget.minimized .more-btn,
+  .widget.minimized .footer,
+  .widget.minimized .last-updated,
+  .widget.minimized #weeklyToggle { display: none !important; }
+  .widget.minimized {
+    width: 100%;
+    padding: 8px 12px 6px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .widget.minimized .titlebar { margin-bottom: 0; }
+  .widget.minimized::after {
+    content: attr(data-mini-stat);
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--cream);
+    text-align: center;
+    padding: 6px 4px 2px;
+    border-top: 1px dashed rgba(217,119,87,0.18);
+    margin-top: 6px;
+  }
 
   /* HERO 5h % big numeral in compact — reduced + label wraps clean */
   .widget.compact .panel[data-panel="main"] .section:nth-child(1) .pct {
@@ -965,7 +993,7 @@
     <div class="title">CLAUDE PULSE</div>
     <div style="display: flex; align-items: center; gap: 6px;">
       <button class="mode-btn" id="refreshBtn" title="Refresh now">↻</button>
-      <button class="mode-btn" id="modeBtn" title="Toggle compact / expanded">▾</button>
+      <button class="mode-btn" id="miniBtn" title="Minimize to status bar">⊟</button>
       <div class="dot"></div>
     </div>
   </div>
@@ -1503,9 +1531,37 @@ You are picking up an in-flight session. Read the working dir, files, and last g
   cvFull.addEventListener('change', () => syncCaveman('full'));
   document.getElementById('cv-mode').addEventListener('change', () => syncCaveman('full'));
   syncCaveman('full');
-  modeBtn.addEventListener('click', () => {
-    applyMode(widget.classList.contains('compact') ? 'expanded' : 'compact');
-  });
+  // Old modeBtn no longer exists in DOM (renamed to miniBtn). Guard for safety.
+  if (modeBtn && modeBtn.addEventListener) {
+    modeBtn.addEventListener('click', () => {
+      applyMode(widget.classList.contains('compact') ? 'expanded' : 'compact');
+    });
+  }
+
+  // Minimize toggle — shrinks widget to header-only strip
+  const miniBtn = document.getElementById('miniBtn');
+  function applyMinimized(on) {
+    if (on) {
+      widget.classList.add('minimized');
+      document.body.classList.add('minimized');
+      miniBtn.textContent = '⊡';
+      miniBtn.title = 'Restore';
+      safeResize(340, 110);
+    } else {
+      widget.classList.remove('minimized');
+      document.body.classList.remove('minimized');
+      miniBtn.textContent = '⊟';
+      miniBtn.title = 'Minimize to status bar';
+      const showingWeekly = widget.classList.contains('show-weekly');
+      safeResize(340, showingWeekly ? 580 : 500);
+    }
+    try { localStorage.setItem('pulseMinimized', on ? '1' : '0'); } catch {}
+  }
+  if (miniBtn) {
+    miniBtn.addEventListener('click', () => applyMinimized(!widget.classList.contains('minimized')));
+    const wasMin = (() => { try { return localStorage.getItem('pulseMinimized') === '1'; } catch { return false; } })();
+    if (wasMin) applyMinimized(true);
+  }
 
   // Weekly limit toggle (compact mode only) — resizes window so the section is visible
   const weeklyToggle = document.getElementById('weeklyToggle');
@@ -1708,6 +1764,11 @@ You are picking up an in-flight session. Read the working dir, files, and last g
             rows[2].querySelector('.val').textContent = `${Math.floor(min/60)}h ${min%60}m`;
           }
           burn.textContent = '⚡ ' + (REAL.burnRate/1000).toFixed(0) + 'k/min';
+
+          // Update minimized status strip with live data
+          const min = b.projection?.remainingMinutes || 0;
+          const pctR = Math.round((b.totalTokens / REAL.blockLimit) * 100);
+          widget.dataset.miniStat = `${pctR}% · ${Math.floor(min/60)}h ${min%60}m · ${Math.round(REAL.burnRate/1000)}k/min`;
         }
 
         // Context window
